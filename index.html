@@ -1,0 +1,1560 @@
+<!DOCTYPE html>
+<html lang="uz" dir="ltr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>Muslim Market</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<style>
+  :root {
+    --primary: #16a34a;
+    --primary-dark: #15803d;
+    --primary-light: #dcfce7;
+    --secondary: #f0fdf4;
+    --accent: #4ade80;
+    --dark: #0f172a;
+    --gray: #64748b;
+    --light: #f8fafc;
+    --card-shadow: 0 4px 24px rgba(22,163,74,0.10);
+    --tg-bg: var(--tg-theme-bg-color, #ffffff);
+    --tg-text: var(--tg-theme-text-color, #0f172a);
+    --tg-hint: var(--tg-theme-hint-color, #64748b);
+    --tg-btn: var(--tg-theme-button-color, #16a34a);
+    --tg-btn-text: var(--tg-theme-button-text-color, #ffffff);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--tg-bg);
+    color: var(--tg-text);
+    min-height: 100vh;
+    overflow-x: hidden;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .gradient-bg { background: linear-gradient(135deg, #16a34a 0%, #15803d 50%, #166534 100%); }
+  .card { background: #fff; border-radius: 16px; box-shadow: var(--card-shadow); }
+  .btn-primary {
+    background: linear-gradient(135deg, #16a34a, #15803d);
+    color: white; border: none; border-radius: 12px;
+    padding: 12px 24px; font-weight: 600; cursor: pointer;
+    transition: all 0.3s ease; font-size: 15px;
+    box-shadow: 0 4px 15px rgba(22,163,74,0.3);
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(22,163,74,0.4); }
+  .btn-primary:active { transform: translateY(0); }
+  .product-card {
+    background: #fff; border-radius: 16px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+    overflow: hidden; transition: all 0.3s ease;
+    cursor: pointer; position: relative;
+  }
+  .product-card:hover { transform: translateY(-4px); box-shadow: 0 8px 32px rgba(22,163,74,0.2); }
+  .product-card:active { transform: scale(0.98); }
+  .badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700;
+  }
+  .badge-green { background: #dcfce7; color: #15803d; }
+  .badge-red { background: #fee2e2; color: #dc2626; }
+  .badge-orange { background: #fff7ed; color: #ea580c; }
+  .badge-blue { background: #eff6ff; color: #2563eb; }
+  .bottom-nav {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(0,0,0,0.08);
+    z-index: 100; padding: 8px 0;
+    padding-bottom: env(safe-area-inset-bottom, 8px);
+  }
+  .nav-item {
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; gap: 3px; padding: 8px 12px;
+    cursor: pointer; transition: all 0.2s; border-radius: 12px;
+    font-size: 10px; font-weight: 500; color: #94a3b8;
+  }
+  .nav-item.active { color: #16a34a; }
+  .nav-item.active i { color: #16a34a; }
+  .nav-item i { font-size: 20px; transition: all 0.2s; }
+  .page { display: none; min-height: 100vh; padding-bottom: 80px; }
+  .page.active { display: block; }
+  input, textarea, select {
+    font-family: 'Inter', sans-serif;
+    outline: none; transition: all 0.3s;
+  }
+  .input-field {
+    width: 100%; padding: 12px 16px; border: 2px solid #e2e8f0;
+    border-radius: 12px; font-size: 15px; background: #f8fafc;
+    color: #0f172a; transition: all 0.3s;
+  }
+  .input-field:focus { border-color: #16a34a; background: #fff; box-shadow: 0 0 0 4px rgba(22,163,74,0.1); }
+  .search-bar {
+    background: #f1f5f9; border-radius: 12px; padding: 10px 16px;
+    display: flex; align-items: center; gap: 10px; border: 2px solid transparent;
+    transition: all 0.3s;
+  }
+  .search-bar:focus-within { border-color: #16a34a; background: #fff; box-shadow: 0 0 0 4px rgba(22,163,74,0.1); }
+  .search-bar input { background: transparent; border: none; flex: 1; font-size: 15px; color: #0f172a; }
+  .category-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 16px; border-radius: 20px; border: 2px solid #e2e8f0;
+    cursor: pointer; transition: all 0.3s; white-space: nowrap;
+    font-size: 13px; font-weight: 500; background: #fff; color: #64748b;
+  }
+  .category-chip.active { background: #16a34a; color: white; border-color: #16a34a; }
+  .category-chip:active { transform: scale(0.96); }
+  .toast {
+    position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px);
+    background: #0f172a; color: white; padding: 12px 24px; border-radius: 12px;
+    font-size: 14px; font-weight: 500; z-index: 9999;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3); display: flex; align-items: center; gap: 8px;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.success { background: linear-gradient(135deg, #16a34a, #15803d); }
+  .toast.error { background: linear-gradient(135deg, #dc2626, #b91c1c); }
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(4px); z-index: 1000;
+    display: flex; align-items: flex-end; justify-content: center;
+    opacity: 0; visibility: hidden; transition: all 0.3s;
+  }
+  .modal-overlay.open { opacity: 1; visibility: visible; }
+  .modal-sheet {
+    background: #fff; border-radius: 24px 24px 0 0;
+    width: 100%; max-height: 92vh; overflow-y: auto;
+    transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    padding-bottom: env(safe-area-inset-bottom, 20px);
+  }
+  .modal-overlay.open .modal-sheet { transform: translateY(0); }
+  .modal-handle {
+    width: 40px; height: 4px; background: #e2e8f0; border-radius: 2px;
+    margin: 12px auto 20px;
+  }
+  .cart-badge {
+    position: absolute; top: -4px; right: -4px;
+    background: #ef4444; color: white; border-radius: 50%;
+    width: 18px; height: 18px; font-size: 10px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .qty-btn {
+    width: 32px; height: 32px; border-radius: 8px; border: none;
+    font-size: 18px; font-weight: 700; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+  }
+  .qty-btn.minus { background: #fee2e2; color: #dc2626; }
+  .qty-btn.plus { background: #dcfce7; color: #16a34a; }
+  .qty-btn:active { transform: scale(0.9); }
+  .skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%; animation: shimmer 1.5s infinite;
+    border-radius: 8px;
+  }
+  @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+  .fade-in { animation: fadeIn 0.4s ease; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+  .slide-up { animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+  @keyframes slideUp { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }
+  .star-rating { display: flex; gap: 2px; }
+  .star { color: #fbbf24; font-size: 14px; }
+  .star.empty { color: #e2e8f0; }
+  .order-step {
+    display: flex; align-items: center; gap: 12px;
+  }
+  .step-dot {
+    width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700; flex-shrink: 0;
+  }
+  .step-dot.done { background: #16a34a; color: white; }
+  .step-dot.active { background: #fbbf24; color: white; }
+  .step-dot.pending { background: #e2e8f0; color: #94a3b8; }
+  .promo-card {
+    background: linear-gradient(135deg, #16a34a 0%, #166534 100%);
+    border-radius: 20px; padding: 20px; color: white; position: relative; overflow: hidden;
+  }
+  .promo-card::before {
+    content: ''; position: absolute; top: -30px; right: -30px;
+    width: 120px; height: 120px; background: rgba(255,255,255,0.1);
+    border-radius: 50%;
+  }
+  .promo-card::after {
+    content: ''; position: absolute; bottom: -20px; right: 30px;
+    width: 80px; height: 80px; background: rgba(255,255,255,0.08);
+    border-radius: 50%;
+  }
+  .review-card { background: #f8fafc; border-radius: 12px; padding: 14px; }
+  ::-webkit-scrollbar { width: 0; height: 0; }
+  .progress-bar { height: 4px; background: #e2e8f0; border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, #16a34a, #4ade80); border-radius: 2px; transition: width 0.5s ease; }
+  .floating-btn {
+    position: fixed; bottom: 90px; right: 20px; z-index: 90;
+    width: 56px; height: 56px; border-radius: 50%; border: none;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 8px 24px rgba(22,163,74,0.4);
+    background: linear-gradient(135deg, #16a34a, #15803d);
+    color: white; font-size: 24px; transition: all 0.3s;
+  }
+  .floating-btn:hover { transform: scale(1.1); }
+  .tag { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: 600; }
+  .section-title { font-size: 18px; font-weight: 700; color: #0f172a; }
+  .divider { height: 1px; background: #f1f5f9; margin: 0; }
+  @media (min-width: 640px) {
+    .product-grid { grid-template-columns: repeat(3, 1fr) !important; }
+    .container-max { max-width: 480px; margin: 0 auto; }
+    body { background: #f1f5f9; }
+    .bottom-nav { max-width: 480px; left: 50%; transform: translateX(-50%); border-left: 1px solid rgba(0,0,0,0.08); border-right: 1px solid rgba(0,0,0,0.08); }
+  }
+  .loading-spinner {
+    width: 40px; height: 40px; border: 3px solid #dcfce7;
+    border-top-color: #16a34a; border-radius: 50%;
+    animation: spin 0.8s linear infinite; margin: 0 auto;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .img-placeholder {
+    background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+    display: flex; align-items: center; justify-content: center;
+    color: #16a34a; font-size: 48px;
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== CONFIG (TAHRIRLASH UCHUN) ===== -->
+<script>
+const CONFIG = {
+  // ⚙️ Google Apps Script Web App URL (Deploy qilgandan so'ng kiriting)
+  SHEET_API_URL: 'https://script.google.com/macros/s/AKfycbwyo7-kAna0NUhbctIieXoupaKbp3e-Efw7SFfWMmuLmDYDkxM9W_7xlzYfS3-eVW0/exec',
+  
+  // 🤖 Telegram Bot Token (Faqat bot username kerak, token serverda)
+  BOT_USERNAME: 'QiziriqOilaMarketBot',
+  
+  // 🖼️ ImgBB API Key
+  IMGBB_API_KEY: 'ad433e82aae872eebbb30c5bfe3fac42',
+  
+  // 🏪 Do'kon sozlamalari
+  SHOP_NAME: 'Oila Market',
+  SHOP_CURRENCY: "so'm",
+  SHOP_PHONE: '+998 91 970 74 79',
+  SHOP_ADDRESS: 'Qiziriq tumani Do'stlik MFY Sariq sh.',
+  
+  // 📦 Yetkazib berish narxi (0 = bepul)
+  DELIVERY_FEE: 10000,
+  FREE_DELIVERY_FROM: 200000,
+  
+  // 💬 Telegram kanal (yangiliklar uchun)
+  CHANNEL_USERNAME: 'CartoonsUz_Channel',
+  
+  // 🔐 Admin Telegram ID lari (vergul bilan ajrating)
+  ADMIN_IDS: ['858310974'],
+};
+</script>
+
+<!-- LOADING SCREEN -->
+<div id="loadingScreen" style="position:fixed;inset:0;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;">
+  <div style="width:80px;height:80px;background:linear-gradient(135deg,#16a34a,#15803d);border-radius:24px;display:flex;align-items:center;justify-content:center;margin-bottom:20px;box-shadow:0 8px 32px rgba(22,163,74,0.3);">
+    <i class="fas fa-store" style="color:white;font-size:36px;"></i>
+  </div>
+  <h1 style="font-size:24px;font-weight:800;color:#0f172a;margin-bottom:8px;">Muslim Market</h1>
+  <p style="color:#64748b;font-size:14px;margin-bottom:30px;">Yuklanmoqda...</p>
+  <div class="loading-spinner"></div>
+</div>
+
+<!-- TOAST -->
+<div id="toast" class="toast"><i id="toastIcon" class="fas fa-check-circle"></i><span id="toastMsg"></span></div>
+
+<!-- MAIN APP -->
+<div id="app" style="display:none;">
+<div class="container-max">
+
+<!-- ===== BOTTOM NAV ===== -->
+<nav class="bottom-nav">
+  <div style="display:flex;justify-content:space-around;align-items:center;">
+    <div class="nav-item active" onclick="showPage('home')" id="nav-home">
+      <i class="fas fa-home"></i><span>Bosh sahifa</span>
+    </div>
+    <div class="nav-item" onclick="showPage('catalog')" id="nav-catalog">
+      <i class="fas fa-th-large"></i><span>Katalog</span>
+    </div>
+    <div class="nav-item" onclick="showPage('cart')" id="nav-cart" style="position:relative;">
+      <div style="position:relative;display:inline-block;">
+        <i class="fas fa-shopping-cart" style="font-size:20px;"></i>
+        <span id="cartBadge" class="cart-badge" style="display:none;">0</span>
+      </div>
+      <span>Savat</span>
+    </div>
+    <div class="nav-item" onclick="showPage('orders')" id="nav-orders">
+      <i class="fas fa-receipt"></i><span>Buyurtmalar</span>
+    </div>
+    <div class="nav-item" onclick="showPage('profile')" id="nav-profile">
+      <i class="fas fa-user"></i><span>Profil</span>
+    </div>
+  </div>
+</nav>
+
+<!-- ===== PAGE: HOME ===== -->
+<div id="page-home" class="page active fade-in">
+  <!-- Header -->
+  <div class="gradient-bg" style="padding:16px 16px 80px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <div>
+        <p style="color:rgba(255,255,255,0.8);font-size:13px;" id="greetingText">Assalomu alaykum!</p>
+        <h2 style="color:white;font-size:20px;font-weight:700;" id="userNameDisplay">Mehmon</h2>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button onclick="showPage('cart')" style="background:rgba(255,255,255,0.2);border:none;width:40px;height:40px;border-radius:12px;color:white;cursor:pointer;position:relative;display:flex;align-items:center;justify-content:center;">
+          <i class="fas fa-shopping-cart" style="font-size:18px;"></i>
+          <span id="cartBadge2" style="display:none;position:absolute;top:-4px;right:-4px;background:#ef4444;color:white;border-radius:50%;width:18px;height:18px;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;">0</span>
+        </button>
+        <button onclick="showPage('profile')" style="background:rgba(255,255,255,0.2);border:none;width:40px;height:40px;border-radius:12px;color:white;cursor:pointer;">
+          <i class="fas fa-user" style="font-size:18px;"></i>
+        </button>
+      </div>
+    </div>
+    <!-- Search -->
+    <div style="background:white;border-radius:14px;padding:10px 14px;display:flex;align-items:center;gap:10px;box-shadow:0 4px 20px rgba(0,0,0,0.1);">
+      <i class="fas fa-search" style="color:#94a3b8;"></i>
+      <input type="text" id="homeSearch" placeholder="Mahsulot qidiring..." style="border:none;outline:none;flex:1;font-size:15px;font-family:Inter,sans-serif;" oninput="searchProducts(this.value)"/>
+      <i class="fas fa-microphone" style="color:#94a3b8;"></i>
+    </div>
+  </div>
+
+  <div style="padding:16px;margin-top:-60px;">
+    <!-- Promo Banner -->
+    <div class="promo-card slide-up" style="margin-bottom:20px;">
+      <div style="position:relative;z-index:1;">
+        <span style="background:rgba(255,255,255,0.2);padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;">🎉 Chegirma</span>
+        <h3 id="promoBannerTitle" style="font-size:22px;font-weight:800;margin:10px 0 6px;">Yangi mahsulotlar!</h3>
+        <p id="promoBannerText" style="font-size:14px;opacity:0.9;margin-bottom:16px;">Bugun maxsus narxlarda xarid qiling</p>
+        <button class="btn-primary" onclick="showPage('catalog')" style="background:white;color:#16a34a;font-size:13px;padding:8px 20px;">Ko'rish <i class="fas fa-arrow-right" style="margin-left:6px;"></i></button>
+      </div>
+    </div>
+
+    <!-- Categories -->
+    <div style="margin-bottom:20px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <h3 class="section-title">Kategoriyalar</h3>
+        <span style="color:#16a34a;font-size:13px;font-weight:600;cursor:pointer;" onclick="showPage('catalog')">Barchasi →</span>
+      </div>
+      <div id="homeCategoriesRow" style="display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;"></div>
+    </div>
+
+    <!-- Featured Products -->
+    <div style="margin-bottom:20px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <h3 class="section-title">🔥 Mashhur mahsulotlar</h3>
+        <span style="color:#16a34a;font-size:13px;font-weight:600;cursor:pointer;" onclick="showPage('catalog')">Barchasi →</span>
+      </div>
+      <div id="featuredProducts" class="product-grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;"></div>
+    </div>
+
+    <!-- New Products -->
+    <div style="margin-bottom:20px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <h3 class="section-title">✨ Yangi mahsulotlar</h3>
+        <span style="color:#16a34a;font-size:13px;font-weight:600;cursor:pointer;" onclick="showPage('catalog')">Barchasi →</span>
+      </div>
+      <div id="newProducts" class="product-grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PAGE: CATALOG ===== -->
+<div id="page-catalog" class="page">
+  <div style="background:white;padding:16px;position:sticky;top:0;z-index:50;border-bottom:1px solid #f1f5f9;">
+    <h2 style="font-size:20px;font-weight:800;margin-bottom:12px;">Katalog</h2>
+    <div class="search-bar">
+      <i class="fas fa-search" style="color:#94a3b8;"></i>
+      <input type="text" id="catalogSearch" placeholder="Mahsulot qidiring..." oninput="filterProducts()" />
+      <button id="filterBtn" onclick="toggleFilter()" style="background:none;border:none;color:#16a34a;cursor:pointer;font-size:18px;"><i class="fas fa-sliders-h"></i></button>
+    </div>
+  </div>
+  
+  <!-- Filter Panel -->
+  <div id="filterPanel" style="display:none;background:#f8fafc;padding:16px;border-bottom:1px solid #e2e8f0;">
+    <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
+      <div style="flex:1;min-width:120px;">
+        <label style="font-size:12px;color:#64748b;font-weight:600;">Narx (dan)</label>
+        <input type="number" id="priceMin" class="input-field" placeholder="0" style="margin-top:4px;padding:8px 12px;" oninput="filterProducts()"/>
+      </div>
+      <div style="flex:1;min-width:120px;">
+        <label style="font-size:12px;color:#64748b;font-weight:600;">Narx (gacha)</label>
+        <input type="number" id="priceMax" class="input-field" placeholder="999999" style="margin-top:4px;padding:8px 12px;" oninput="filterProducts()"/>
+      </div>
+      <div style="width:100%;">
+        <label style="font-size:12px;color:#64748b;font-weight:600;">Saralash</label>
+        <select id="sortBy" class="input-field" style="margin-top:4px;padding:8px 12px;" onchange="filterProducts()">
+          <option value="">Standart</option>
+          <option value="price_asc">Narx: Arzondan qimmatga</option>
+          <option value="price_desc">Narx: Qimmatdan arzonga</option>
+          <option value="name_asc">Nomi: A-Z</option>
+          <option value="rating">Reyting bo'yicha</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Categories scroll -->
+  <div style="padding:12px 16px;background:white;border-bottom:1px solid #f1f5f9;">
+    <div id="catalogCategoriesRow" style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;"></div>
+  </div>
+
+  <!-- Products Grid -->
+  <div style="padding:16px;">
+    <div id="catalogProducts" class="product-grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;"></div>
+    <div id="noProductsMsg" style="display:none;text-align:center;padding:40px 20px;">
+      <i class="fas fa-search" style="font-size:48px;color:#cbd5e1;margin-bottom:12px;"></i>
+      <p style="color:#94a3b8;font-size:16px;">Mahsulot topilmadi</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PAGE: CART ===== -->
+<div id="page-cart" class="page">
+  <div style="padding:16px;background:white;border-bottom:1px solid #f1f5f9;position:sticky;top:0;z-index:50;">
+    <h2 style="font-size:20px;font-weight:800;">🛒 Savat</h2>
+  </div>
+  
+  <div id="cartEmpty" style="display:none;text-align:center;padding:60px 20px;">
+    <div style="width:100px;height:100px;background:#f0fdf4;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;">
+      <i class="fas fa-shopping-cart" style="font-size:40px;color:#86efac;"></i>
+    </div>
+    <h3 style="font-size:18px;font-weight:700;color:#0f172a;margin-bottom:8px;">Savat bo'sh</h3>
+    <p style="color:#94a3b8;margin-bottom:24px;">Mahsulotlarni savatga qo'shing</p>
+    <button class="btn-primary" onclick="showPage('catalog')">Xarid qilish</button>
+  </div>
+  
+  <div id="cartContent" style="display:none;">
+    <div id="cartItems" style="padding:16px;display:flex;flex-direction:column;gap:12px;"></div>
+    
+    <!-- Promo Code -->
+    <div style="padding:0 16px 16px;">
+      <div style="background:#f8fafc;border-radius:14px;padding:14px;">
+        <p style="font-size:13px;font-weight:600;color:#64748b;margin-bottom:8px;">Promo-kod</p>
+        <div style="display:flex;gap:8px;">
+          <input type="text" id="promoInput" class="input-field" placeholder="Kodni kiriting" style="flex:1;padding:10px 14px;"/>
+          <button onclick="applyPromo()" class="btn-primary" style="padding:10px 16px;font-size:13px;">Qo'llash</button>
+        </div>
+        <p id="promoMsg" style="font-size:12px;margin-top:6px;color:#16a34a;display:none;"></p>
+      </div>
+    </div>
+
+    <!-- Delivery -->
+    <div style="padding:0 16px 16px;">
+      <div style="background:#f8fafc;border-radius:14px;padding:14px;">
+        <p style="font-size:13px;font-weight:600;color:#64748b;margin-bottom:10px;">Yetkazib berish turi</p>
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;margin-bottom:8px;">
+          <input type="radio" name="delivery" value="delivery" id="deliveryTypeDelivery" checked onchange="updateCartSummary()" style="accent-color:#16a34a;width:18px;height:18px;"/>
+          <div>
+            <p style="font-weight:600;font-size:14px;">Yetkazib berish</p>
+            <p style="font-size:12px;color:#64748b;" id="deliveryFeeText">15 000 so'm</p>
+          </div>
+          <span style="margin-left:auto;" id="deliveryFeeShow"></span>
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+          <input type="radio" name="delivery" value="pickup" id="deliveryTypePickup" onchange="updateCartSummary()" style="accent-color:#16a34a;width:18px;height:18px;"/>
+          <div>
+            <p style="font-weight:600;font-size:14px;">O'zi olib ketish</p>
+            <p style="font-size:12px;color:#64748b;">Bepul • Do'kondan</p>
+          </div>
+        </label>
+      </div>
+    </div>
+
+    <!-- Order Summary -->
+    <div style="padding:0 16px 16px;">
+      <div style="background:#f8fafc;border-radius:14px;padding:14px;">
+        <p style="font-size:15px;font-weight:700;margin-bottom:12px;">Buyurtma xulosasi</p>
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+          <span style="color:#64748b;font-size:14px;">Mahsulotlar</span>
+          <span id="subtotalPrice" style="font-weight:600;font-size:14px;"></span>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px;" id="discountRow" style="display:none;">
+          <span style="color:#64748b;font-size:14px;">Chegirma</span>
+          <span id="discountPrice" style="font-weight:600;font-size:14px;color:#16a34a;"></span>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:12px;">
+          <span style="color:#64748b;font-size:14px;">Yetkazib berish</span>
+          <span id="deliveryFeeDisplay" style="font-weight:600;font-size:14px;"></span>
+        </div>
+        <div class="divider"></div>
+        <div style="display:flex;justify-content:space-between;margin-top:12px;">
+          <span style="font-weight:700;font-size:16px;">Jami</span>
+          <span id="totalPrice" style="font-weight:800;font-size:18px;color:#16a34a;"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Address -->
+    <div id="deliveryAddressSection" style="padding:0 16px 16px;">
+      <div style="background:#f8fafc;border-radius:14px;padding:14px;">
+        <p style="font-size:13px;font-weight:600;color:#64748b;margin-bottom:8px;">Yetkazib berish manzili</p>
+        <input type="text" id="deliveryAddress" class="input-field" placeholder="Manzilni kiriting (ko'cha, uy raqami)" style="margin-bottom:8px;"/>
+        <input type="text" id="deliveryNote" class="input-field" placeholder="Qo'shimcha izoh (ixtiyoriy)" />
+      </div>
+    </div>
+
+    <!-- Checkout Btn -->
+    <div style="padding:0 16px 20px;">
+      <button class="btn-primary" onclick="placeOrder()" style="width:100%;padding:16px;font-size:16px;">
+        <i class="fas fa-check-circle" style="margin-right:8px;"></i>Buyurtma berish
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PAGE: ORDERS ===== -->
+<div id="page-orders" class="page">
+  <div style="padding:16px;background:white;border-bottom:1px solid #f1f5f9;position:sticky;top:0;z-index:50;">
+    <h2 style="font-size:20px;font-weight:800;">📋 Buyurtmalarim</h2>
+  </div>
+  
+  <div id="ordersEmpty" style="display:none;text-align:center;padding:60px 20px;">
+    <div style="width:100px;height:100px;background:#f0fdf4;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;">
+      <i class="fas fa-receipt" style="font-size:40px;color:#86efac;"></i>
+    </div>
+    <h3 style="font-size:18px;font-weight:700;margin-bottom:8px;">Buyurtmalar yo'q</h3>
+    <p style="color:#94a3b8;margin-bottom:24px;">Hali birorta buyurtma bermadingiz</p>
+    <button class="btn-primary" onclick="showPage('catalog')">Xarid qilish</button>
+  </div>
+  
+  <div id="ordersList" style="padding:16px;display:flex;flex-direction:column;gap:12px;"></div>
+</div>
+
+<!-- ===== PAGE: PROFILE ===== -->
+<div id="page-profile" class="page">
+  <div class="gradient-bg" style="padding:30px 16px 60px;text-align:center;">
+    <div id="profileAvatar" style="width:80px;height:80px;background:rgba(255,255,255,0.2);border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:36px;color:white;border:3px solid rgba(255,255,255,0.4);overflow:hidden;">
+      <i class="fas fa-user"></i>
+    </div>
+    <h2 id="profileName" style="color:white;font-size:20px;font-weight:800;margin-bottom:4px;">-</h2>
+    <p id="profileUsername" style="color:rgba(255,255,255,0.8);font-size:14px;margin-bottom:12px;">-</p>
+    <span id="profileRole" class="badge" style="background:rgba(255,255,255,0.2);color:white;">Foydalanuvchi</span>
+  </div>
+  
+  <div style="padding:16px;margin-top:-40px;">
+    <!-- Stats -->
+    <div class="card" style="padding:16px;margin-bottom:16px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center;">
+      <div>
+        <p id="totalOrdersCount" style="font-size:22px;font-weight:800;color:#0f172a;">0</p>
+        <p style="font-size:11px;color:#94a3b8;">Buyurtmalar</p>
+      </div>
+      <div style="border-left:1px solid #f1f5f9;border-right:1px solid #f1f5f9;">
+        <p id="totalSpentAmount" style="font-size:22px;font-weight:800;color:#16a34a;">0</p>
+        <p style="font-size:11px;color:#94a3b8;">Jami xarid</p>
+      </div>
+      <div>
+        <p id="savedProductsCount" style="font-size:22px;font-weight:800;color:#f59e0b;">0</p>
+        <p style="font-size:11px;color:#94a3b8;">Sevimlilar</p>
+      </div>
+    </div>
+    
+    <!-- Menu Items -->
+    <div class="card" style="overflow:hidden;margin-bottom:16px;">
+      <div onclick="showPage('orders')" style="display:flex;align-items:center;gap:14px;padding:16px;cursor:pointer;border-bottom:1px solid #f1f5f9;">
+        <div style="width:40px;height:40px;background:#dcfce7;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#16a34a;font-size:18px;"><i class="fas fa-receipt"></i></div>
+        <div style="flex:1;"><p style="font-weight:600;">Buyurtmalarim</p><p style="font-size:12px;color:#94a3b8;">Barcha buyurtmalarim</p></div>
+        <i class="fas fa-chevron-right" style="color:#cbd5e1;"></i>
+      </div>
+      <div onclick="showFavorites()" style="display:flex;align-items:center;gap:14px;padding:16px;cursor:pointer;border-bottom:1px solid #f1f5f9;">
+        <div style="width:40px;height:40px;background:#fef3c7;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#f59e0b;font-size:18px;"><i class="fas fa-heart"></i></div>
+        <div style="flex:1;"><p style="font-weight:600;">Sevimlilar</p><p style="font-size:12px;color:#94a3b8;">Saqlangan mahsulotlar</p></div>
+        <i class="fas fa-chevron-right" style="color:#cbd5e1;"></i>
+      </div>
+      <div onclick="showAddressBook()" style="display:flex;align-items:center;gap:14px;padding:16px;cursor:pointer;border-bottom:1px solid #f1f5f9;">
+        <div style="width:40px;height:40px;background:#eff6ff;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#2563eb;font-size:18px;"><i class="fas fa-map-marker-alt"></i></div>
+        <div style="flex:1;"><p style="font-weight:600;">Manzillar</p><p style="font-size:12px;color:#94a3b8;">Yetkazib berish manzillari</p></div>
+        <i class="fas fa-chevron-right" style="color:#cbd5e1;"></i>
+      </div>
+      <div onclick="openSupport()" style="display:flex;align-items:center;gap:14px;padding:16px;cursor:pointer;">
+        <div style="width:40px;height:40px;background:#f5f3ff;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#7c3aed;font-size:18px;"><i class="fas fa-headset"></i></div>
+        <div style="flex:1;"><p style="font-weight:600;">Qo'llab-quvvatlash</p><p style="font-size:12px;color:#94a3b8;">Admin bilan bog'lanish</p></div>
+        <i class="fas fa-chevron-right" style="color:#cbd5e1;"></i>
+      </div>
+    </div>
+
+    <!-- About -->
+    <div class="card" style="overflow:hidden;margin-bottom:16px;">
+      <div onclick="openChannel()" style="display:flex;align-items:center;gap:14px;padding:16px;cursor:pointer;border-bottom:1px solid #f1f5f9;">
+        <div style="width:40px;height:40px;background:#e0f2fe;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#0284c7;font-size:18px;"><i class="fab fa-telegram"></i></div>
+        <div style="flex:1;"><p style="font-weight:600;">Kanalimiz</p><p style="font-size:12px;color:#94a3b8;">Yangiliklar va chegirmalar</p></div>
+        <i class="fas fa-chevron-right" style="color:#cbd5e1;"></i>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;padding:16px;">
+        <div style="width:40px;height:40px;background:#f0fdf4;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#16a34a;font-size:18px;"><i class="fas fa-info-circle"></i></div>
+        <div style="flex:1;"><p style="font-weight:600;">Ilova haqida</p><p style="font-size:12px;color:#94a3b8;">Muslim Market v1.0</p></div>
+      </div>
+    </div>
+    
+    <p style="text-align:center;color:#cbd5e1;font-size:12px;margin-top:8px;">Muslim Market © 2024. Barcha huquqlar himoyalangan</p>
+  </div>
+</div>
+
+</div><!-- /container-max -->
+</div><!-- /app -->
+
+<!-- ===== PRODUCT DETAIL MODAL ===== -->
+<div id="productModal" class="modal-overlay">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div id="productModalContent" style="padding:0 16px 20px;"></div>
+  </div>
+</div>
+
+<!-- ===== ORDER SUCCESS MODAL ===== -->
+<div id="orderSuccessModal" class="modal-overlay">
+  <div class="modal-sheet" style="text-align:center;padding:40px 20px;">
+    <div class="modal-handle"></div>
+    <div style="width:80px;height:80px;background:#dcfce7;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;">
+      <i class="fas fa-check" style="font-size:36px;color:#16a34a;"></i>
+    </div>
+    <h3 style="font-size:22px;font-weight:800;margin-bottom:8px;">Buyurtma qabul qilindi!</h3>
+    <p style="color:#64748b;margin-bottom:6px;">Buyurtma raqami: <strong id="orderIdDisplay"></strong></p>
+    <p style="color:#64748b;font-size:14px;margin-bottom:24px;">Tez orada siz bilan bog'lanamiz</p>
+    <button class="btn-primary" onclick="closeOrderSuccess()" style="width:100%;padding:14px;">Bosh sahifaga qaytish</button>
+  </div>
+</div>
+
+<!-- ===== FAVORITES MODAL ===== -->
+<div id="favoritesModal" class="modal-overlay">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div style="padding:0 16px 20px;">
+      <h3 style="font-size:18px;font-weight:700;margin-bottom:16px;">❤️ Sevimli mahsulotlar</h3>
+      <div id="favoritesList" style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;"></div>
+      <div id="favoritesEmpty" style="text-align:center;padding:40px 0;display:none;">
+        <i class="fas fa-heart" style="font-size:48px;color:#fecaca;margin-bottom:12px;"></i>
+        <p style="color:#94a3b8;">Hali sevimlilar yo'q</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ORDER DETAIL MODAL ===== -->
+<div id="orderDetailModal" class="modal-overlay">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div id="orderDetailContent" style="padding:0 16px 20px;"></div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+//  STATE
+// ============================================================
+let currentUser = null;
+let products = [];
+let categories = [];
+let cart = JSON.parse(localStorage.getItem('mm_cart') || '[]');
+let favorites = JSON.parse(localStorage.getItem('mm_favorites') || '[]');
+let orders = [];
+let selectedCategory = 'all';
+let promoDiscount = 0;
+let promoCode = '';
+let filteredProducts = [];
+let currentPage = 'home';
+let settings = {};
+
+// ============================================================
+//  INIT
+// ============================================================
+async function init() {
+  try {
+    // Telegram WebApp init
+    if (window.Telegram && window.Telegram.WebApp) {
+      const tg = window.Telegram.WebApp;
+      tg.ready();
+      tg.expand();
+      tg.setHeaderColor('#16a34a');
+      tg.setBackgroundColor('#ffffff');
+      
+      const tgUser = tg.initDataUnsafe?.user;
+      if (tgUser) {
+        currentUser = {
+          id: String(tgUser.id),
+          name: [tgUser.first_name, tgUser.last_name].filter(Boolean).join(' '),
+          username: tgUser.username || '',
+          photo: tgUser.photo_url || '',
+          isAdmin: CONFIG.ADMIN_IDS.includes(String(tgUser.id))
+        };
+      }
+    }
+    
+    if (!currentUser) {
+      currentUser = {
+        id: 'guest_' + Math.random().toString(36).substr(2,9),
+        name: 'Mehmon',
+        username: '',
+        photo: '',
+        isAdmin: false
+      };
+    }
+    
+    updateUserUI();
+    updateCartBadge();
+    
+    // Load data
+    await Promise.all([loadSettings(), loadCategories(), loadProducts()]);
+    await loadUserOrders();
+    renderHome();
+    renderCatalog();
+    renderCart();
+    renderOrders();
+    renderProfile();
+    
+    // Register user in sheets
+    registerUser();
+    
+    document.getElementById('loadingScreen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    
+  } catch(e) {
+    console.error('Init error:', e);
+    document.getElementById('loadingScreen').innerHTML = `
+      <i class="fas fa-exclamation-triangle" style="font-size:48px;color:#ef4444;margin-bottom:16px;"></i>
+      <p style="color:#ef4444;font-size:16px;">Ulanishda xato</p>
+      <p style="color:#94a3b8;font-size:13px;margin-top:8px;">Internetni tekshiring va qayta urinib ko'ring</p>
+      <button class="btn-primary" onclick="location.reload()" style="margin-top:20px;">Qayta urinish</button>
+    `;
+  }
+}
+
+// ============================================================
+//  API CALLS
+// ============================================================
+async function apiCall(action, data = {}) {
+  const url = CONFIG.SHEET_API_URL;
+  if (!url || url.includes('YOUR_APPS_SCRIPT_ID')) {
+    // Demo mode
+    return getDemoData(action, data);
+  }
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {'Content-Type': 'text/plain;charset=utf-8'},
+      body: JSON.stringify({ action, ...data, userId: currentUser?.id })
+    });
+    const json = await res.json();
+    return json;
+  } catch(e) {
+    console.error('API Error:', e);
+    return getDemoData(action, data);
+  }
+}
+
+function getDemoData(action, data) {
+  const demoProducts = [
+    { id:'p1', name:'Go\'sht (mol)', category:'Oziq-ovqat', price:85000, oldPrice:100000, image:'', description:'Yangi mol go\'shti, halol. 1 kg', stock:50, rating:4.8, reviewCount:24, isNew:true, isFeatured:true, unit:'kg' },
+    { id:'p2', name:'Sabzi', category:'Sabzavot', price:8000, oldPrice:0, image:'', description:'Yangi sabzi. 1 kg', stock:100, rating:4.5, reviewCount:12, isNew:false, isFeatured:true, unit:'kg' },
+    { id:'p3', name:'Guruch (devzira)', category:'Oziq-ovqat', price:32000, oldPrice:38000, image:'', description:'Eng yaxshi devzira guruch. 1 kg', stock:200, rating:4.9, reviewCount:56, isNew:false, isFeatured:true, unit:'kg' },
+    { id:'p4', name:'Tuxum (10 dona)', category:'Sut-tuxum', price:25000, oldPrice:0, image:'', description:'Yangi qishloq tuxumi, 10 dona', stock:80, rating:4.7, reviewCount:33, isNew:true, isFeatured:false, unit:'quti' },
+    { id:'p5', name:'Non (kulcha)', category:'Non', price:5000, oldPrice:0, image:'', description:'Yangi yopilgan kulcha non', stock:30, rating:4.6, reviewCount:18, isNew:false, isFeatured:false, unit:'dona' },
+    { id:'p6', name:'Yog\' (o\'simlik)', category:'Oziq-ovqat', price:45000, oldPrice:52000, image:'', description:'Rafinirlangan o\'simlik moyi 5L', stock:60, rating:4.4, reviewCount:9, isNew:false, isFeatured:true, unit:'litr' },
+    { id:'p7', name:'Sut (1L)', category:'Sut-tuxum', price:12000, oldPrice:0, image:'', description:'Yangi qishloq suti, 1 litr', stock:40, rating:4.8, reviewCount:27, isNew:true, isFeatured:false, unit:'litr' },
+    { id:'p8', name:'Pomidor', category:'Sabzavot', price:12000, oldPrice:0, image:'', description:'Yangi pomidor. 1 kg', stock:90, rating:4.3, reviewCount:15, isNew:false, isFeatured:false, unit:'kg' },
+  ];
+  const demoCategories = ['Barchasi','Oziq-ovqat','Sabzavot','Sut-tuxum','Non','Meva','Go\'sht'];
+  const demoSettings = { promoBannerTitle:'Yangi mahsulotlar!', promoBannerText:'Bugun maxsus narxlarda', deliveryFee:15000, freeDeliveryFrom:200000 };
+  
+  switch(action) {
+    case 'getProducts': return { success:true, data: demoProducts };
+    case 'getCategories': return { success:true, data: demoCategories };
+    case 'getSettings': return { success:true, data: demoSettings };
+    case 'getOrders': return { success:true, data: [] };
+    case 'placeOrder': return { success:true, orderId: 'ORD-' + Date.now() };
+    case 'registerUser': return { success:true };
+    case 'getReviews': return { success:true, data: [] };
+    case 'addReview': return { success:true };
+    case 'getPromo': return data.code === 'MUSLIM10' ? { success:true, discount:10 } : { success:false };
+    default: return { success:true, data:[] };
+  }
+}
+
+async function loadSettings() {
+  const res = await apiCall('getSettings');
+  if (res.success) {
+    settings = res.data || {};
+    CONFIG.DELIVERY_FEE = settings.deliveryFee || CONFIG.DELIVERY_FEE;
+    CONFIG.FREE_DELIVERY_FROM = settings.freeDeliveryFrom || CONFIG.FREE_DELIVERY_FROM;
+  }
+}
+async function loadCategories() {
+  const res = await apiCall('getCategories');
+  if (res.success) categories = res.data || [];
+}
+async function loadProducts() {
+  const res = await apiCall('getProducts');
+  if (res.success) {
+    products = (res.data || []).filter(p => p.stock > 0 || p.stock === undefined);
+    filteredProducts = [...products];
+  }
+}
+async function loadUserOrders() {
+  const res = await apiCall('getOrders', { userId: currentUser?.id });
+  if (res.success) orders = res.data || [];
+}
+async function registerUser() {
+  if (currentUser && !currentUser.id.startsWith('guest_')) {
+    await apiCall('registerUser', { user: currentUser });
+  }
+}
+
+// ============================================================
+//  NAVIGATION
+// ============================================================
+function showPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  const navEl = document.getElementById('nav-' + page);
+  if (navEl) navEl.classList.add('active');
+  currentPage = page;
+  window.scrollTo(0, 0);
+  if (page === 'orders') { loadUserOrders().then(renderOrders); }
+  if (page === 'cart') renderCart();
+}
+
+// ============================================================
+//  USER UI
+// ============================================================
+function updateUserUI() {
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'Xayrli tong' : hour < 17 ? 'Xayrli kun' : 'Xayrli kech';
+  document.getElementById('greetingText').textContent = greeting + '!';
+  document.getElementById('userNameDisplay').textContent = currentUser?.name || 'Mehmon';
+}
+function updateCartBadge() {
+  const count = cart.reduce((s, i) => s + i.qty, 0);
+  const badge = document.getElementById('cartBadge');
+  const badge2 = document.getElementById('cartBadge2');
+  if (badge) { badge.textContent = count; badge.style.display = count > 0 ? 'flex' : 'none'; }
+  if (badge2) { badge2.textContent = count; badge2.style.display = count > 0 ? 'flex' : 'none'; }
+  localStorage.setItem('mm_cart', JSON.stringify(cart));
+}
+
+// ============================================================
+//  PRODUCT CARD HTML
+// ============================================================
+function productCardHTML(p) {
+  const isFav = favorites.includes(p.id);
+  const inCart = cart.find(i => i.id === p.id);
+  const discount = p.oldPrice > 0 ? Math.round((1 - p.price/p.oldPrice)*100) : 0;
+  const imgContent = p.image ? 
+    `<img src="${p.image}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.innerHTML='<div class=img-placeholder style=width:100%;height:100%;><i class=fas fa-box></i></div>'"/>` :
+    `<div class="img-placeholder" style="width:100%;height:100%;"><i class="fas fa-box" style="font-size:36px;"></i></div>`;
+  
+  return `
+    <div class="product-card" onclick="openProduct('${p.id}')">
+      <div style="height:130px;position:relative;overflow:hidden;">
+        ${imgContent}
+        ${discount > 0 ? `<span class="badge badge-red" style="position:absolute;top:8px;left:8px;">-${discount}%</span>` : ''}
+        ${p.isNew ? `<span class="badge badge-blue" style="position:absolute;top:8px;${discount>0?'top:32px;':''} left:8px;">Yangi</span>` : ''}
+        <button onclick="event.stopPropagation();toggleFavorite('${p.id}')" style="position:absolute;top:8px;right:8px;background:white;border:none;width:30px;height:30px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+          <i class="fas fa-heart" style="font-size:14px;color:${isFav?'#ef4444':'#cbd5e1'};"></i>
+        </button>
+      </div>
+      <div style="padding:10px;">
+        <p style="font-size:12px;color:#94a3b8;margin-bottom:2px;">${p.category||''}</p>
+        <p style="font-size:14px;font-weight:600;color:#0f172a;margin-bottom:6px;line-height:1.3;" title="${p.name}">${p.name.length>28?p.name.substr(0,28)+'...':p.name}</p>
+        <div style="display:flex;align-items:center;gap:4px;margin-bottom:8px;">
+          ${renderStars(p.rating||0)}
+          <span style="font-size:11px;color:#94a3b8;">(${p.reviewCount||0})</span>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <p style="font-size:15px;font-weight:800;color:#16a34a;">${formatPrice(p.price)}</p>
+            ${p.oldPrice > 0 ? `<p style="font-size:11px;color:#94a3b8;text-decoration:line-through;">${formatPrice(p.oldPrice)}</p>` : ''}
+          </div>
+          <button onclick="event.stopPropagation();quickAddCart('${p.id}')" style="background:${inCart?'#dcfce7':'#16a34a'};border:none;width:32px;height:32px;border-radius:10px;color:${inCart?'#16a34a':'white'};cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;" id="qbtn-${p.id}">
+            <i class="fas ${inCart?'fa-check':'fa-plus'}"></i>
+          </button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderStars(rating) {
+  let html = '';
+  for(let i=1;i<=5;i++) {
+    html += `<i class="fas fa-star" style="font-size:12px;color:${i<=Math.round(rating)?'#fbbf24':'#e2e8f0'};"></i>`;
+  }
+  return html;
+}
+
+// ============================================================
+//  HOME PAGE
+// ============================================================
+function renderHome() {
+  // Promo banner
+  if (settings.promoBannerTitle) document.getElementById('promoBannerTitle').textContent = settings.promoBannerTitle;
+  if (settings.promoBannerText) document.getElementById('promoBannerText').textContent = settings.promoBannerText;
+  
+  // Categories
+  const catRow = document.getElementById('homeCategoriesRow');
+  catRow.innerHTML = '';
+  const allCats = categories.filter(c => c !== 'Barchasi').slice(0, 6);
+  allCats.forEach(cat => {
+    const chip = document.createElement('div');
+    chip.className = 'category-chip';
+    chip.style.flexShrink = '0';
+    const icon = getCategoryIcon(cat);
+    chip.innerHTML = `${icon} ${cat}`;
+    chip.onclick = () => { showPage('catalog'); setCategory(cat); };
+    catRow.appendChild(chip);
+  });
+  
+  // Featured
+  const feat = products.filter(p => p.isFeatured).slice(0, 4);
+  const featEl = document.getElementById('featuredProducts');
+  if (feat.length) featEl.innerHTML = feat.map(productCardHTML).join('');
+  else featEl.innerHTML = '<p style="color:#94a3b8;grid-column:span 2;text-align:center;padding:20px;">Yuklanmoqda...</p>';
+  
+  // New
+  const newProds = products.filter(p => p.isNew).slice(0, 4);
+  const newEl = document.getElementById('newProducts');
+  if (newProds.length) newEl.innerHTML = newProds.map(productCardHTML).join('');
+  else newEl.innerHTML = '';
+}
+
+function getCategoryIcon(cat) {
+  const icons = {
+    'Oziq-ovqat':'🌾','Sabzavot':'🥕','Meva':'🍎','Go\'sht':'🥩','Sut-tuxum':'🥛','Non':'🍞',
+    'Ichimlik':'🥤','Shirinlik':'🍬','Baliq':'🐟','Qush go\'shti':'🍗'
+  };
+  return icons[cat] || '📦';
+}
+
+// ============================================================
+//  CATALOG PAGE
+// ============================================================
+function renderCatalog() {
+  // Categories
+  const catRow = document.getElementById('catalogCategoriesRow');
+  catRow.innerHTML = '';
+  const allCats = ['Barchasi', ...categories.filter(c => c !== 'Barchasi')];
+  allCats.forEach(cat => {
+    const chip = document.createElement('div');
+    chip.className = 'category-chip' + (selectedCategory === (cat === 'Barchasi' ? 'all' : cat) ? ' active' : '');
+    chip.style.flexShrink = '0';
+    chip.textContent = cat === 'Barchasi' ? 'Barchasi' : getCategoryIcon(cat) + ' ' + cat;
+    chip.onclick = () => setCategory(cat === 'Barchasi' ? 'all' : cat);
+    catRow.appendChild(chip);
+  });
+  
+  renderCatalogProducts();
+}
+
+function setCategory(cat) {
+  selectedCategory = cat;
+  renderCatalog();
+  filterProducts();
+}
+
+function filterProducts() {
+  const search = document.getElementById('catalogSearch')?.value.toLowerCase() || '';
+  const minPrice = parseFloat(document.getElementById('priceMin')?.value) || 0;
+  const maxPrice = parseFloat(document.getElementById('priceMax')?.value) || Infinity;
+  const sortBy = document.getElementById('sortBy')?.value || '';
+  
+  filteredProducts = products.filter(p => {
+    const matchSearch = !search || p.name.toLowerCase().includes(search) || p.description?.toLowerCase().includes(search) || p.category?.toLowerCase().includes(search);
+    const matchCat = selectedCategory === 'all' || p.category === selectedCategory;
+    const matchPrice = p.price >= minPrice && p.price <= maxPrice;
+    return matchSearch && matchCat && matchPrice;
+  });
+  
+  if (sortBy === 'price_asc') filteredProducts.sort((a,b) => a.price - b.price);
+  else if (sortBy === 'price_desc') filteredProducts.sort((a,b) => b.price - a.price);
+  else if (sortBy === 'name_asc') filteredProducts.sort((a,b) => a.name.localeCompare(b.name));
+  else if (sortBy === 'rating') filteredProducts.sort((a,b) => (b.rating||0) - (a.rating||0));
+  
+  renderCatalogProducts();
+}
+
+function renderCatalogProducts() {
+  const el = document.getElementById('catalogProducts');
+  const noMsg = document.getElementById('noProductsMsg');
+  if (filteredProducts.length === 0) {
+    el.innerHTML = '';
+    noMsg.style.display = 'block';
+  } else {
+    noMsg.style.display = 'none';
+    el.innerHTML = filteredProducts.map(productCardHTML).join('');
+  }
+}
+
+function searchProducts(val) {
+  const search = val.toLowerCase();
+  filteredProducts = products.filter(p =>
+    p.name.toLowerCase().includes(search) ||
+    p.description?.toLowerCase().includes(search) ||
+    p.category?.toLowerCase().includes(search)
+  );
+  renderHome();
+}
+
+function toggleFilter() {
+  const panel = document.getElementById('filterPanel');
+  panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+}
+
+// ============================================================
+//  PRODUCT DETAIL
+// ============================================================
+async function openProduct(id) {
+  const p = products.find(pr => pr.id === id);
+  if (!p) return;
+  
+  const inCart = cart.find(i => i.id === p.id);
+  const isFav = favorites.includes(p.id);
+  const discount = p.oldPrice > 0 ? Math.round((1 - p.price/p.oldPrice)*100) : 0;
+  
+  // Load reviews
+  const reviewsRes = await apiCall('getReviews', { productId: id });
+  const reviews = reviewsRes.data || [];
+  
+  const imgContent = p.image ? 
+    `<img src="${p.image}" alt="${p.name}" style="width:100%;height:260px;object-fit:cover;" onerror="this.style.display='none'"/>` :
+    `<div class="img-placeholder" style="width:100%;height:260px;font-size:64px;"><i class="fas fa-box"></i></div>`;
+  
+  document.getElementById('productModalContent').innerHTML = `
+    <div style="margin:0 -16px 20px;overflow:hidden;border-radius:0 0 0 0;position:relative;">
+      ${imgContent}
+      ${discount > 0 ? `<span class="badge badge-red" style="position:absolute;top:16px;left:16px;font-size:13px;padding:6px 12px;">-${discount}% chegirma</span>` : ''}
+      <button onclick="toggleFavorite('${p.id}');document.querySelector('#productModalContent .fav-icon').className='fas fa-heart';document.querySelector('#productModalContent .fav-icon').style.color='${isFav?'#cbd5e1':'#ef4444'}'" style="position:absolute;top:12px;right:12px;background:white;border:none;width:40px;height:40px;border-radius:50%;cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,0.15);display:flex;align-items:center;justify-content:center;">
+        <i class="fas fa-heart fav-icon" style="font-size:18px;color:${isFav?'#ef4444':'#cbd5e1'};"></i>
+      </button>
+    </div>
+    
+    <span style="background:#f0fdf4;color:#16a34a;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;">${p.category||''}</span>
+    <h2 style="font-size:20px;font-weight:800;margin:10px 0 6px;color:#0f172a;">${p.name}</h2>
+    
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+      <div style="display:flex;gap:2px;">${renderStars(p.rating||0)}</div>
+      <span style="font-weight:600;color:#0f172a;">${p.rating||0}</span>
+      <span style="color:#94a3b8;font-size:13px;">(${p.reviewCount||reviews.length} sharh)</span>
+      <span style="color:#94a3b8;">•</span>
+      <span style="color:${p.stock>0?'#16a34a':'#ef4444'};font-size:13px;font-weight:600;">${p.stock>0?'Mavjud':'Tugagan'}</span>
+    </div>
+    
+    <p style="color:#64748b;font-size:14px;line-height:1.7;margin-bottom:16px;">${p.description||''}</p>
+    
+    ${p.unit ? `<div style="background:#f8fafc;border-radius:10px;padding:10px 14px;margin-bottom:16px;display:flex;align-items:center;gap:8px;">
+      <i class="fas fa-balance-scale" style="color:#16a34a;"></i>
+      <span style="font-size:14px;color:#64748b;">Birlik: <strong style="color:#0f172a;">${p.unit}</strong></span>
+    </div>` : ''}
+    
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+      <div>
+        <p style="font-size:26px;font-weight:900;color:#16a34a;">${formatPrice(p.price)}</p>
+        ${p.oldPrice > 0 ? `<p style="font-size:14px;color:#94a3b8;text-decoration:line-through;">${formatPrice(p.oldPrice)}</p>` : ''}
+      </div>
+      ${p.stock > 0 ? `
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button class="qty-btn minus" onclick="changeModalQty('${p.id}', -1)">−</button>
+        <span id="modalQty-${p.id}" style="font-size:18px;font-weight:700;min-width:24px;text-align:center;">${inCart ? inCart.qty : 1}</span>
+        <button class="qty-btn plus" onclick="changeModalQty('${p.id}', 1)">+</button>
+      </div>` : '<span class="badge badge-red" style="font-size:14px;padding:8px 16px;">Mavjud emas</span>'}
+    </div>
+    
+    ${p.stock > 0 ? `
+    <button class="btn-primary" onclick="addToCartFromModal('${p.id}')" style="width:100%;padding:16px;font-size:16px;margin-bottom:16px;">
+      <i class="fas fa-shopping-cart" style="margin-right:8px;"></i>${inCart?'Savatni yangilash':'Savatga qo\'shish'}
+    </button>` : ''}
+    
+    <!-- Reviews -->
+    <div style="margin-top:8px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <h3 style="font-size:16px;font-weight:700;">Sharhlar</h3>
+        <button onclick="openReviewForm('${p.id}')" style="background:#f0fdf4;border:none;color:#16a34a;padding:6px 14px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;">+ Sharh qoldirish</button>
+      </div>
+      ${reviews.length > 0 ? reviews.slice(0,3).map(r => `
+        <div class="review-card" style="margin-bottom:10px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div style="width:32px;height:32px;background:#dcfce7;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;">👤</div>
+              <span style="font-weight:600;font-size:14px;">${r.userName||'Foydalanuvchi'}</span>
+            </div>
+            <div style="display:flex;gap:2px;">${renderStars(r.rating||5)}</div>
+          </div>
+          <p style="font-size:13px;color:#64748b;line-height:1.5;">${r.text||''}</p>
+          <p style="font-size:11px;color:#cbd5e1;margin-top:4px;">${r.date||''}</p>
+        </div>`).join('') : '<p style="color:#94a3b8;text-align:center;padding:20px 0;font-size:14px;">Hali sharh yo\'q</p>'}
+    </div>
+  `;
+  
+  document.getElementById('productModal').classList.add('open');
+}
+
+function closeProductModal() {
+  document.getElementById('productModal').classList.remove('open');
+}
+
+let modalQtyMap = {};
+function changeModalQty(id, delta) {
+  if (!modalQtyMap[id]) {
+    const inCart = cart.find(i => i.id === id);
+    modalQtyMap[id] = inCart ? inCart.qty : 1;
+  }
+  modalQtyMap[id] = Math.max(1, modalQtyMap[id] + delta);
+  document.getElementById('modalQty-' + id).textContent = modalQtyMap[id];
+}
+
+function addToCartFromModal(id) {
+  const p = products.find(pr => pr.id === id);
+  if (!p) return;
+  const qty = modalQtyMap[id] || 1;
+  const existing = cart.findIndex(i => i.id === id);
+  if (existing >= 0) cart[existing].qty = qty;
+  else cart.push({ id: p.id, name: p.name, price: p.price, image: p.image, unit: p.unit, qty });
+  updateCartBadge();
+  showToast('Savatga qo\'shildi!', 'success');
+  closeProductModal();
+  renderHome();
+  renderCatalog();
+}
+
+function quickAddCart(id) {
+  const p = products.find(pr => pr.id === id);
+  if (!p) return;
+  const existing = cart.findIndex(i => i.id === id);
+  if (existing >= 0) cart[existing].qty++;
+  else cart.push({ id: p.id, name: p.name, price: p.price, image: p.image, unit: p.unit, qty: 1 });
+  updateCartBadge();
+  showToast('✅ Savatga qo\'shildi', 'success');
+  const btn = document.getElementById('qbtn-' + id);
+  if (btn) { btn.style.background = '#dcfce7'; btn.innerHTML = '<i class="fas fa-check" style="color:#16a34a;"></i>'; }
+}
+
+// ============================================================
+//  REVIEWS
+// ============================================================
+function openReviewForm(productId) {
+  closeProductModal();
+  const modal = document.createElement('div');
+  modal.className = 'modal-overlay open';
+  modal.id = 'reviewModal';
+  modal.innerHTML = `
+    <div class="modal-sheet" style="padding:20px;">
+      <div class="modal-handle"></div>
+      <h3 style="font-size:18px;font-weight:700;margin-bottom:16px;">Sharh qoldirish</h3>
+      <p style="font-size:14px;color:#64748b;margin-bottom:12px;">Baho bering:</p>
+      <div style="display:flex;gap:8px;margin-bottom:16px;" id="ratingPicker">
+        ${[1,2,3,4,5].map(i=>`<i class="fas fa-star" data-val="${i}" onclick="setReviewRating(${i})" style="font-size:32px;color:#e2e8f0;cursor:pointer;transition:all 0.2s;"></i>`).join('')}
+      </div>
+      <textarea id="reviewText" class="input-field" placeholder="Fikringizni yozing..." style="min-height:100px;resize:none;margin-bottom:16px;"></textarea>
+      <button class="btn-primary" onclick="submitReview('${productId}')" style="width:100%;padding:14px;">Yuborish</button>
+    </div>`;
+  document.body.appendChild(modal);
+  modal.onclick = (e) => { if(e.target===modal) { modal.remove(); openProduct(productId); } };
+}
+
+let reviewRating = 0;
+function setReviewRating(val) {
+  reviewRating = val;
+  document.querySelectorAll('#ratingPicker i').forEach((star, i) => {
+    star.style.color = i < val ? '#fbbf24' : '#e2e8f0';
+  });
+}
+
+async function submitReview(productId) {
+  const text = document.getElementById('reviewText')?.value.trim();
+  if (!reviewRating) { showToast('Baho bering!', 'error'); return; }
+  if (!text) { showToast('Fikringizni yozing!', 'error'); return; }
+  await apiCall('addReview', {
+    productId, rating: reviewRating, text,
+    userName: currentUser?.name,
+    userId: currentUser?.id,
+    date: new Date().toLocaleDateString('uz-UZ')
+  });
+  document.getElementById('reviewModal')?.remove();
+  showToast('Sharh qo\'shildi!', 'success');
+  openProduct(productId);
+}
+
+// ============================================================
+//  FAVORITES
+// ============================================================
+function toggleFavorite(id) {
+  const idx = favorites.indexOf(id);
+  if (idx >= 0) { favorites.splice(idx, 1); showToast('Sevimlilardan olib tashlandi', ''); }
+  else { favorites.push(id); showToast('❤️ Sevimlilarga qo\'shildi', 'success'); }
+  localStorage.setItem('mm_favorites', JSON.stringify(favorites));
+  document.getElementById('savedProductsCount').textContent = favorites.length;
+}
+function showFavorites() {
+  const modal = document.getElementById('favoritesModal');
+  const list = document.getElementById('favoritesList');
+  const empty = document.getElementById('favoritesEmpty');
+  const favProds = products.filter(p => favorites.includes(p.id));
+  if (favProds.length === 0) {
+    list.innerHTML = ''; empty.style.display = 'block';
+  } else {
+    empty.style.display = 'none';
+    list.innerHTML = favProds.map(productCardHTML).join('');
+  }
+  modal.classList.add('open');
+  modal.onclick = (e) => { if(e.target===modal) modal.classList.remove('open'); };
+}
+
+// ============================================================
+//  CART
+// ============================================================
+function renderCart() {
+  const empty = document.getElementById('cartEmpty');
+  const content = document.getElementById('cartContent');
+  const items = document.getElementById('cartItems');
+  
+  if (cart.length === 0) {
+    empty.style.display = 'block'; content.style.display = 'none'; return;
+  }
+  empty.style.display = 'none'; content.style.display = 'block';
+  
+  items.innerHTML = cart.map(item => `
+    <div class="card" style="padding:14px;display:flex;align-items:center;gap:12px;" id="cartItem-${item.id}">
+      <div style="width:60px;height:60px;border-radius:12px;overflow:hidden;flex-shrink:0;background:#f0fdf4;display:flex;align-items:center;justify-content:center;">
+        ${item.image ? `<img src="${item.image}" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.innerHTML='<i class=fas fa-box style=color:#86efac;font-size:24px;></i>'"/>` : '<i class="fas fa-box" style="color:#86efac;font-size:24px;"></i>'}
+      </div>
+      <div style="flex:1;">
+        <p style="font-weight:600;font-size:14px;margin-bottom:4px;">${item.name}</p>
+        <p style="color:#16a34a;font-weight:700;font-size:15px;">${formatPrice(item.price)}<span style="color:#94a3b8;font-size:12px;"> / ${item.unit||'dona'}</span></p>
+        <div style="display:flex;align-items:center;gap:10px;margin-top:8px;">
+          <button class="qty-btn minus" onclick="updateCartQty('${item.id}', -1)">−</button>
+          <span style="font-weight:700;font-size:16px;min-width:24px;text-align:center;">${item.qty}</span>
+          <button class="qty-btn plus" onclick="updateCartQty('${item.id}', 1)">+</button>
+          <span style="color:#94a3b8;font-size:13px;margin-left:4px;">= ${formatPrice(item.price * item.qty)}</span>
+        </div>
+      </div>
+      <button onclick="removeFromCart('${item.id}')" style="background:#fee2e2;border:none;width:36px;height:36px;border-radius:10px;cursor:pointer;color:#ef4444;font-size:16px;display:flex;align-items:center;justify-content:center;">
+        <i class="fas fa-trash"></i>
+      </button>
+    </div>`).join('');
+  
+  updateCartSummary();
+}
+
+function updateCartQty(id, delta) {
+  const idx = cart.findIndex(i => i.id === id);
+  if (idx < 0) return;
+  cart[idx].qty = Math.max(1, cart[idx].qty + delta);
+  updateCartBadge();
+  renderCart();
+}
+
+function removeFromCart(id) {
+  cart = cart.filter(i => i.id !== id);
+  updateCartBadge();
+  renderCart();
+}
+
+function updateCartSummary() {
+  const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
+  const isDelivery = document.getElementById('deliveryTypeDelivery')?.checked;
+  const deliveryFee = isDelivery ? (subtotal >= CONFIG.FREE_DELIVERY_FROM ? 0 : CONFIG.DELIVERY_FEE) : 0;
+  const discount = Math.round(subtotal * promoDiscount / 100);
+  const total = subtotal - discount + deliveryFee;
+  
+  document.getElementById('subtotalPrice').textContent = formatPrice(subtotal);
+  document.getElementById('discountRow').style.display = discount > 0 ? 'flex' : 'none';
+  document.getElementById('discountPrice').textContent = '-' + formatPrice(discount);
+  document.getElementById('deliveryFeeDisplay').textContent = deliveryFee === 0 ? 'Bepul' : formatPrice(deliveryFee);
+  document.getElementById('totalPrice').textContent = formatPrice(total);
+  document.getElementById('deliveryFeeText').textContent = subtotal >= CONFIG.FREE_DELIVERY_FROM ? '🎉 Bepul yetkazib berish!' : formatPrice(CONFIG.DELIVERY_FEE) + ' (yoki ' + formatPrice(CONFIG.FREE_DELIVERY_FROM) + ' dan bepul)';
+  
+  const addrSection = document.getElementById('deliveryAddressSection');
+  if (addrSection) addrSection.style.display = isDelivery ? 'block' : 'none';
+}
+
+async function applyPromo() {
+  const code = document.getElementById('promoInput').value.trim().toUpperCase();
+  if (!code) return;
+  const res = await apiCall('getPromo', { code });
+  const msg = document.getElementById('promoMsg');
+  msg.style.display = 'block';
+  if (res.success) {
+    promoDiscount = res.discount;
+    promoCode = code;
+    msg.textContent = `✅ Promo-kod qo'llandi! ${res.discount}% chegirma`;
+    msg.style.color = '#16a34a';
+    updateCartSummary();
+  } else {
+    msg.textContent = '❌ Promo-kod noto\'g\'ri yoki muddati o\'tgan';
+    msg.style.color = '#ef4444';
+  }
+}
+
+async function placeOrder() {
+  if (cart.length === 0) return;
+  const isDelivery = document.getElementById('deliveryTypeDelivery')?.checked;
+  const address = document.getElementById('deliveryAddress')?.value.trim();
+  const note = document.getElementById('deliveryNote')?.value.trim();
+  
+  if (isDelivery && !address) {
+    showToast('Manzilni kiriting!', 'error');
+    document.getElementById('deliveryAddress').focus();
+    return;
+  }
+  
+  const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
+  const deliveryFee = isDelivery ? (subtotal >= CONFIG.FREE_DELIVERY_FROM ? 0 : CONFIG.DELIVERY_FEE) : 0;
+  const discount = Math.round(subtotal * promoDiscount / 100);
+  const total = subtotal - discount + deliveryFee;
+  
+  const order = {
+    userId: currentUser?.id,
+    userName: currentUser?.name,
+    userUsername: currentUser?.username,
+    items: cart,
+    subtotal, deliveryFee, discount, total,
+    deliveryType: isDelivery ? 'delivery' : 'pickup',
+    address: address || '',
+    note: note || '',
+    promoCode,
+    status: 'new',
+    date: new Date().toISOString()
+  };
+  
+  const btn = document.querySelector('#page-cart .btn-primary');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right:8px;"></i>Buyurtma berilmoqda...';
+  
+  const res = await apiCall('placeOrder', { order });
+  
+  btn.disabled = false;
+  btn.innerHTML = '<i class="fas fa-check-circle" style="margin-right:8px;"></i>Buyurtma berish';
+  
+  if (res.success) {
+    document.getElementById('orderIdDisplay').textContent = res.orderId || ('ORD-' + Date.now());
+    document.getElementById('orderSuccessModal').classList.add('open');
+    
+    // Notify via Telegram bot
+    sendOrderNotification(order, res.orderId);
+    
+    cart = [];
+    promoDiscount = 0;
+    promoCode = '';
+    updateCartBadge();
+    
+    loadUserOrders().then(renderOrders);
+  } else {
+    showToast('Xato yuz berdi, qayta urinib ko\'ring', 'error');
+  }
+}
+
+function closeOrderSuccess() {
+  document.getElementById('orderSuccessModal').classList.remove('open');
+  showPage('orders');
+}
+
+async function sendOrderNotification(order, orderId) {
+  // Notify admin via Telegram
+  try {
+    await apiCall('notifyAdmin', { order, orderId });
+  } catch(e) {}
+}
+
+// ============================================================
+//  ORDERS
+// ============================================================
+function renderOrders() {
+  const empty = document.getElementById('ordersEmpty');
+  const list = document.getElementById('ordersList');
+  
+  if (!orders || orders.length === 0) {
+    empty.style.display = 'block'; list.innerHTML = ''; return;
+  }
+  empty.style.display = 'none';
+  
+  list.innerHTML = orders.map(o => {
+    const statusColors = {
+      new: { bg:'#eff6ff', color:'#2563eb', label:'Yangi' },
+      confirmed: { bg:'#fef3c7', color:'#d97706', label:'Tasdiqlangan' },
+      processing: { bg:'#fff7ed', color:'#ea580c', label:'Tayyorlanmoqda' },
+      delivering: { bg:'#f0fdf4', color:'#16a34a', label:'Yetkazilmoqda' },
+      delivered: { bg:'#dcfce7', color:'#15803d', label:'Yetkazildi' },
+      cancelled: { bg:'#fee2e2', color:'#dc2626', label:'Bekor qilindi' }
+    };
+    const s = statusColors[o.status] || statusColors.new;
+    return `
+      <div class="card" style="padding:16px;cursor:pointer;" onclick="openOrderDetail('${o.id}')">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <span style="font-weight:700;color:#0f172a;">#${o.id}</span>
+          <span class="badge" style="background:${s.bg};color:${s.color};">${s.label}</span>
+        </div>
+        <p style="font-size:13px;color:#64748b;margin-bottom:10px;">${o.date ? new Date(o.date).toLocaleDateString('uz-UZ', {day:'2-digit',month:'long',year:'numeric'}) : ''}</p>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px;">
+          ${(o.items||[]).slice(0,3).map(i=>`<span style="background:#f8fafc;padding:3px 8px;border-radius:6px;font-size:12px;color:#64748b;">${i.name} x${i.qty}</span>`).join('')}
+          ${(o.items||[]).length > 3 ? `<span style="background:#f8fafc;padding:3px 8px;border-radius:6px;font-size:12px;color:#94a3b8;">+${o.items.length-3} ta yana</span>` : ''}
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-size:13px;color:#64748b;">${o.deliveryType==='delivery'?'🚚 Yetkazib berish':'🏪 O\'zi olish'}</span>
+          <span style="font-weight:800;color:#16a34a;font-size:16px;">${formatPrice(o.total||0)}</span>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function openOrderDetail(orderId) {
+  const o = orders.find(ord => ord.id == orderId);
+  if (!o) return;
+  
+  const statusLabels = { new:'Yangi', confirmed:'Tasdiqlangan', processing:'Tayyorlanmoqda', delivering:'Yetkazilmoqda', delivered:'Yetkazildi', cancelled:'Bekor qilindi' };
+  const steps = ['new','confirmed','processing','delivering','delivered'];
+  const currentStep = steps.indexOf(o.status);
+  
+  document.getElementById('orderDetailContent').innerHTML = `
+    <h3 style="font-size:18px;font-weight:700;margin-bottom:4px;">Buyurtma #${o.id}</h3>
+    <p style="color:#94a3b8;font-size:13px;margin-bottom:20px;">${o.date ? new Date(o.date).toLocaleString('uz-UZ') : ''}</p>
+    
+    <!-- Status Steps -->
+    <div style="background:#f8fafc;border-radius:14px;padding:16px;margin-bottom:16px;">
+      <p style="font-weight:600;margin-bottom:14px;">Holati: <span style="color:#16a34a;">${statusLabels[o.status]||o.status}</span></p>
+      ${steps.map((step, idx) => `
+        <div class="order-step" style="margin-bottom:${idx<steps.length-1?'16px':'0'};">
+          <div class="step-dot ${idx < currentStep ? 'done' : idx === currentStep ? 'active' : 'pending'}">
+            ${idx < currentStep ? '<i class="fas fa-check" style="font-size:12px;"></i>' : idx+1}
+          </div>
+          <div style="flex:1;">
+            <p style="font-size:14px;font-weight:${idx===currentStep?'700':'500'};color:${idx<=currentStep?'#0f172a':'#94a3b8'};">${statusLabels[step]}</p>
+          </div>
+          ${idx < steps.length-1 ? `<div style="position:absolute;left:31px;width:2px;height:16px;background:${idx<currentStep?'#16a34a':'#e2e8f0'};margin-top:32px;display:${idx<steps.length-1?'none':'none'}"></div>` : ''}
+        </div>`).join('')}
+    </div>
+    
+    <!-- Items -->
+    <div style="background:#f8fafc;border-radius:14px;padding:16px;margin-bottom:16px;">
+      <p style="font-weight:600;margin-bottom:12px;">Mahsulotlar</p>
+      ${(o.items||[]).map(item => `
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <div style="flex:1;">
+            <p style="font-size:14px;font-weight:500;">${item.name}</p>
+            <p style="font-size:12px;color:#94a3b8;">${formatPrice(item.price)} x ${item.qty}</p>
+          </div>
+          <p style="font-weight:700;color:#0f172a;">${formatPrice(item.price * item.qty)}</p>
+        </div>`).join('')}
+    </div>
+    
+    <!-- Summary -->
+    <div style="background:#f8fafc;border-radius:14px;padding:16px;margin-bottom:16px;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><span style="color:#64748b;">Mahsulotlar</span><span>${formatPrice(o.subtotal||0)}</span></div>
+      ${o.discount > 0 ? `<div style="display:flex;justify-content:space-between;margin-bottom:8px;"><span style="color:#64748b;">Chegirma</span><span style="color:#16a34a;">-${formatPrice(o.discount)}</span></div>` : ''}
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><span style="color:#64748b;">Yetkazib berish</span><span>${o.deliveryFee===0?'Bepul':formatPrice(o.deliveryFee||0)}</span></div>
+      <div class="divider" style="margin:10px 0;"></div>
+      <div style="display:flex;justify-content:space-between;"><span style="font-weight:700;">Jami</span><span style="font-weight:800;color:#16a34a;font-size:18px;">${formatPrice(o.total||0)}</span></div>
+    </div>
+    
+    ${o.address ? `<div style="background:#eff6ff;border-radius:14px;padding:14px;margin-bottom:16px;">
+      <p style="font-size:13px;color:#64748b;margin-bottom:4px;">Yetkazib berish manzili</p>
+      <p style="font-weight:600;color:#0f172a;">${o.address}</p>
+      ${o.note ? `<p style="font-size:13px;color:#64748b;margin-top:4px;">${o.note}</p>` : ''}
+    </div>` : ''}
+    
+    ${o.status === 'new' || o.status === 'confirmed' ? `
+    <button onclick="cancelOrder('${o.id}')" style="width:100%;padding:14px;border:2px solid #ef4444;border-radius:12px;color:#ef4444;font-weight:600;background:white;cursor:pointer;font-family:Inter,sans-serif;font-size:15px;">
+      Buyurtmani bekor qilish
+    </button>` : ''}
+  `;
+  
+  document.getElementById('orderDetailModal').classList.add('open');
+  document.getElementById('orderDetailModal').onclick = (e) => {
+    if (e.target === document.getElementById('orderDetailModal')) closeOrderDetail();
+  };
+}
+
+function closeOrderDetail() {
+  document.getElementById('orderDetailModal').classList.remove('open');
+}
+
+async function cancelOrder(orderId) {
+  const res = await apiCall('cancelOrder', { orderId, userId: currentUser?.id });
+  if (res.success) {
+    showToast('Buyurtma bekor qilindi', '');
+    closeOrderDetail();
+    loadUserOrders().then(renderOrders);
+  } else {
+    showToast('Bekor qilishda xato yuz berdi', 'error');
+  }
+}
+
+// ============================================================
+//  PROFILE
+// ============================================================
+function renderProfile() {
+  if (!currentUser) return;
+  document.getElementById('profileName').textContent = currentUser.name || 'Mehmon';
+  document.getElementById('profileUsername').textContent = currentUser.username ? '@' + currentUser.username : 'Telegram foydalanuvchi';
+  document.getElementById('profileRole').textContent = currentUser.isAdmin ? '⚡ Admin' : 'Foydalanuvchi';
+  
+  if (currentUser.photo) {
+    document.getElementById('profileAvatar').innerHTML = `<img src="${currentUser.photo}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;"/>`;
+  }
+  
+  document.getElementById('totalOrdersCount').textContent = orders.length;
+  document.getElementById('totalSpentAmount').textContent = orders.reduce((s,o)=>s+(o.total||0),0).toLocaleString('uz-UZ').split(',')[0];
+  document.getElementById('savedProductsCount').textContent = favorites.length;
+}
+
+function showAddressBook() {
+  showToast('Bu funksiya tez kunda', '');
+}
+function openSupport() {
+  if (window.Telegram?.WebApp) {
+    window.Telegram.WebApp.openLink(`https://t.me/${CONFIG.BOT_USERNAME}`);
+  } else {
+    window.open(`https://t.me/${CONFIG.BOT_USERNAME}`, '_blank');
+  }
+}
+function openChannel() {
+  const url = `https://t.me/${CONFIG.CHANNEL_USERNAME}`;
+  if (window.Telegram?.WebApp) window.Telegram.WebApp.openLink(url);
+  else window.open(url, '_blank');
+}
+
+// ============================================================
+//  UTILITIES
+// ============================================================
+function formatPrice(price) {
+  return new Intl.NumberFormat('uz-UZ').format(price) + " so'm";
+}
+
+function showToast(msg, type = '') {
+  const toast = document.getElementById('toast');
+  const toastMsg = document.getElementById('toastMsg');
+  const toastIcon = document.getElementById('toastIcon');
+  toastMsg.textContent = msg;
+  toast.className = 'toast' + (type ? ' ' + type : '');
+  if (type === 'success') toastIcon.className = 'fas fa-check-circle';
+  else if (type === 'error') toastIcon.className = 'fas fa-times-circle';
+  else toastIcon.className = 'fas fa-info-circle';
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+// Close modals on overlay click
+document.getElementById('productModal').addEventListener('click', function(e) {
+  if (e.target === this) closeProductModal();
+});
+
+// Swipe to close modal
+let startY = 0;
+document.querySelectorAll('.modal-sheet').forEach(sheet => {
+  sheet.addEventListener('touchstart', e => { startY = e.touches[0].clientY; });
+  sheet.addEventListener('touchend', e => {
+    if (e.changedTouches[0].clientY - startY > 100) {
+      sheet.closest('.modal-overlay').classList.remove('open');
+    }
+  });
+});
+
+// ============================================================
+//  START
+// ============================================================
+window.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
