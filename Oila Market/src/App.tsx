@@ -13,7 +13,7 @@ import { GuideView } from './components/GuideView';
 import type { User as UserType } from './types';
 
 // Detect if it's Admin via URL or Telegram user ID
-const ADMIN_IDS = [123456789, 987654321]; // Replace with real admin Telegram IDs
+const ADMIN_IDS = [858310974]; // Replace with real admin Telegram IDs
 const isAdminUrl = () => typeof window !== 'undefined' && (
   window.location.href.includes('admin') ||
   window.location.search.includes('admin=1') ||
