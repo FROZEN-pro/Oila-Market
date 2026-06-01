@@ -2,15 +2,15 @@
 // OILA MARKET - Global Configuration
 // ============================================================
 
-export const API_URL = 'https://script.google.com/macros/s/AKfycbyaCpT21CZ1d5gi-rvdBSB9YucigLoNLkNgQJf93kZFIn2e_UiETdZ4Vw2wxnWZZD2G/exec';
-export const IMGBB_API_KEY = 'b8b99c5e3e5e5e5e5e5e5e5e5e5e5e5e'; // Replace with real imgbb key
+export const API_URL = 'https://script.google.com/macros/s/AKfycbxIRfzbDDxrNh3LFxG1CxTNaYWM0x9WL12aa9GmvfskgYLKRcH30eW2Gcq1C2kj4CqI/exec';
+export const IMGBB_API_KEY = 'ad433e82aae872eebbb30c5bfe3fac42'; // Replace with real imgbb key
 
 export const APP_VERSION = '2.0.0';
 export const STORE_NAME = 'Oila Market';
 export const STORE_EMOJI = '🏪';
 export const TELEGRAM_CHANNEL = '@oilamarket';
-export const TELEGRAM_BOT_USER = '@OilaMarketBot';
-export const TELEGRAM_BOT_ADMIN = '@OilaMarketAdminBot';
+export const TELEGRAM_BOT_USER = '@QiziriqOilaMarketBot';
+export const TELEGRAM_BOT_ADMIN = '@QiziriqOilaMarketAdminBot';
 
 export const COLORS = {
   primary: '#6366f1',
