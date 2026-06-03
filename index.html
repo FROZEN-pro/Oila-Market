@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Oila Market</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--primary:#6C63FF;--primary-light:#8B83FF;--primary-dark:#5A52E0;--secondary:#FF6584;--accent:#00C9A7;--bg:#F5F7FB;--card:#FFF;--text:#1A1A2E;--text-secondary:#6B7280;--border:#E5E7EB;--shadow:0 2px 12px rgba(0,0,0,0.08);--shadow-lg:0 8px 30px rgba(0,0,0,0.12);--radius:16px;--radius-sm:10px;--transition:all .3s cubic-bezier(.4,0,.2,1)}
+[data-theme="dark"]{--bg:#0F0F1A;--card:#1A1A2E;--text:#E5E7EB;--text-secondary:#9CA3AF;--border:#2D2D44;--shadow:0 2px 12px rgba(0,0,0,0.3);--shadow-lg:0 8px 30px rgba(0,0,0,0.4)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);transition:var(--transition);overflow-x:hidden;max-width:480px;margin:0 auto;min-height:100vh;position:relative}
+.page{display:none;padding:16px 16px 80px;animation:fadeIn .3s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideUp{from{opacity:0;transform:translateY(100%)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+
+/* Header */
+.header{display:flex;align-items:center;justify-content:space-between;padding:16px 0;position:sticky;top:0;background:var(--bg);z-index:100}
+.header h1{font-size:24px;font-weight:800;background:linear-gradient(135deg,var(--primary),var(--secondary));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.header-actions{display:flex;gap:12px;align-items:center}
+.header-btn{width:40px;height:40px;border-radius:50%;background:var(--card);border:none;display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--text);cursor:pointer;box-shadow:var(--shadow);position:relative;transition:var(--transition)}
+.header-btn:hover{transform:scale(1.1)}
+.badge{position:absolute;top:-2px;right:-2px;background:var(--secondary);color:#fff;font-size:10px;font-weight:700;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.badge:empty{display:none}
+
+/* Search */
+.search-bar{display:flex;align-items:center;background:var(--card);border-radius:var(--radius);padding:12px 16px;box-shadow:var(--shadow);margin-bottom:16px;gap:10px}
+.search-bar input{flex:1;border:none;outline:none;background:transparent;font-size:15px;color:var(--text);font-family:inherit}
+.search-bar i{color:var(--text-secondary)}
+
+/* Banner Slider */
+.banner-slider{position:relative;border-radius:var(--radius);overflow:hidden;margin-bottom:20px;height:180px;box-shadow:var(--shadow-lg)}
+.banner-slide{position:absolute;width:100%;height:100%;opacity:0;transition:opacity .8s ease;background-size:cover;background-position:center;display:flex;align-items:flex-end}
+.banner-slide.active{opacity:1}
+.banner-slide::after{content:'';position:absolute;bottom:0;left:0;right:0;height:60%;background:linear-gradient(transparent,rgba(0,0,0,0.7))}
+.banner-content{position:relative;z-index:2;padding:20px;color:#fff;width:100%}
+.banner-content h3{font-size:18px;font-weight:700;margin-bottom:4px}
+.banner-content p{font-size:13px;opacity:0.9}
+.banner-dots{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:3}
+.banner-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.5);cursor:pointer;transition:var(--transition)}
+.banner-dot.active{background:#fff;width:20px;border-radius:4px}
+
+/* Categories */
+.categories-scroll{display:flex;gap:12px;overflow-x:auto;padding-bottom:8px;margin-bottom:20px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.categories-scroll::-webkit-scrollbar{display:none}
+.cat-chip{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:72px;padding:12px 8px;background:var(--card);border-radius:var(--radius-sm);cursor:pointer;transition:var(--transition);box-shadow:var(--shadow);border:2px solid transparent}
+.cat-chip.active{border-color:var(--primary);background:linear-gradient(135deg,rgba(108,99,255,0.1),rgba(255,101,132,0.1))}
+.cat-chip .icon{font-size:24px}
+.cat-chip span{font-size:11px;font-weight:600;white-space:nowrap}
+
+/* Products Grid */
+.section-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.section-title h2{font-size:20px;font-weight:700}
+.section-title a{color:var(--primary);font-size:13px;font-weight:600;cursor:pointer}
+.products-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:20px}
+.product-card{background:var(--card);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);cursor:pointer;transition:var(--transition);position:relative}
+.product-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg)}
+.product-img{width:100%;height:160px;object-fit:cover;background:#f0f0f0}
+.product-info{padding:12px}
+.product-name{font-size:14px;font-weight:600;margin-bottom:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.product-price{font-size:16px;font-weight:800;color:var(--primary)}
+.product-old-price{font-size:12px;color:var(--text-secondary);text-decoration:line-through;margin-left:6px}
+.product-rating{display:flex;align-items:center;gap:4px;margin-top:4px;font-size:12px;color:var(--text-secondary)}
+.product-rating i{color:#FFC107}
+.fav-btn{position:absolute;top:10px;right:10px;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,0.9);border:none;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:var(--transition);z-index:2}
+.fav-btn.active{color:var(--secondary)}
+.add-cart-btn{position:absolute;bottom:10px;right:10px;width:32px;height:32px;border-radius:50%;background:var(--primary);color:#fff;border:none;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:var(--transition);box-shadow:0 2px 8px rgba(108,99,255,0.4)}
+.add-cart-btn:hover{transform:scale(1.15)}
+
+/* Bottom Nav */
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--card);display:flex;justify-content:space-around;padding:8px 0 12px;box-shadow:0 -2px 20px rgba(0,0,0,0.08);z-index:100;border-radius:20px 20px 0 0}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:6px 12px;border-radius:12px;transition:var(--transition);color:var(--text-secondary);position:relative;background:none;border:none;font-family:inherit}
+.nav-item.active{color:var(--primary)}
+.nav-item.active::after{content:'';position:absolute;bottom:0;width:20px;height:3px;background:var(--primary);border-radius:2px}
+.nav-item i{font-size:20px}
+.nav-item span{font-size:10px;font-weight:600}
+
+/* Product Detail Modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;animation:fadeIn .2s ease}
+.modal-overlay.active{display:block}
+.modal{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;max-height:90vh;background:var(--card);border-radius:24px 24px 0 0;z-index:201;overflow-y:auto;animation:slideUp .4s cubic-bezier(.4,0,.2,1)}
+.modal-close{position:absolute;top:16px;right:16px;width:36px;height:36px;border-radius:50%;background:rgba(0,0,0,0.1);border:none;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:5;color:var(--text)}
+.modal-img{width:100%;height:280px;object-fit:cover}
+.modal-body{padding:20px}
+.modal-body h2{font-size:22px;font-weight:700;margin-bottom:8px}
+.modal-price-row{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.modal-price{font-size:24px;font-weight:800;color:var(--primary)}
+.modal-old-price{font-size:16px;color:var(--text-secondary);text-decoration:line-through}
+.modal-desc{font-size:14px;line-height:1.6;color:var(--text-secondary);margin-bottom:16px}
+.modal-stats{display:flex;gap:16px;margin-bottom:20px}
+.modal-stat{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-secondary)}
+.modal-stat i{color:var(--primary)}
+
+/* Reviews */
+.reviews-section{margin-top:16px;border-top:1px solid var(--border);padding-top:16px}
+.review-card{background:var(--bg);border-radius:var(--radius-sm);padding:12px;margin-bottom:10px}
+.review-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.review-user{font-weight:600;font-size:14px}
+.review-stars{color:#FFC107;font-size:12px}
+.review-text{font-size:13px;color:var(--text-secondary);line-height:1.5}
+.review-date{font-size:11px;color:var(--text-secondary);margin-top:4px}
+.write-review{margin-top:12px}
+.write-review textarea{width:100%;border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;font-family:inherit;font-size:14px;resize:none;height:80px;background:var(--bg);color:var(--text);outline:none}
+.star-rating{display:flex;gap:4px;margin:8px 0}
+.star-rating i{font-size:24px;color:var(--border);cursor:pointer;transition:var(--transition)}
+.star-rating i.active{color:#FFC107}
+
+/* Cart Page */
+.cart-item{display:flex;gap:12px;background:var(--card);border-radius:var(--radius);padding:12px;margin-bottom:12px;box-shadow:var(--shadow);align-items:center}
+.cart-item-img{width:80px;height:80px;border-radius:var(--radius-sm);object-fit:cover;flex-shrink:0}
+.cart-item-info{flex:1}
+.cart-item-name{font-size:14px;font-weight:600;margin-bottom:4px}
+.cart-item-price{font-size:15px;font-weight:700;color:var(--primary)}
+.qty-control{display:flex;align-items:center;gap:8px;margin-top:6px}
+.qty-btn{width:28px;height:28px;border-radius:50%;border:1px solid var(--border);background:var(--bg);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text);transition:var(--transition)}
+.qty-btn:hover{background:var(--primary);color:#fff;border-color:var(--primary)}
+.cart-remove{color:var(--secondary);background:none;border:none;font-size:18px;cursor:pointer;padding:8px}
+.cart-summary{background:var(--card);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);margin-top:16px}
+.cart-summary-row{display:flex;justify-content:space-between;margin-bottom:8px;font-size:14px}
+.cart-summary-row.total{font-size:18px;font-weight:800;color:var(--primary);border-top:1px solid var(--border);padding-top:10px;margin-top:4px}
+.btn-primary{width:100%;padding:14px;border:none;border-radius:var(--radius);background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff;font-size:16px;font-weight:700;cursor:pointer;transition:var(--transition);font-family:inherit;margin-top:12px}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(108,99,255,0.4)}
+.btn-primary:disabled{opacity:0.5;cursor:not-allowed;transform:none}
+.empty-state{text-align:center;padding:60px 20px}
+.empty-state i{font-size:64px;color:var(--border);margin-bottom:16px}
+.empty-state h3{font-size:18px;margin-bottom:8px}
+.empty-state p{color:var(--text-secondary);font-size:14px}
+
+/* Orders */
+.order-card{background:var(--card);border-radius:var(--radius);padding:16px;margin-bottom:12px;box-shadow:var(--shadow)}
+.order-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.order-id{font-weight:700;font-size:14px}
+.order-status{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase}
+.status-pending{background:#FFF3CD;color:#856404}
+.status-confirmed{background:#D1ECF1;color:#0C5460}
+.status-shipping{background:#CCE5FF;color:#004085}
+.status-delivered{background:#D4EDDA;color:#155724}
+.status-cancelled{background:#F8D7DA;color:#721C24}
+.order-items-preview{font-size:13px;color:var(--text-secondary);margin-bottom:8px}
+.order-footer{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--text-secondary)}
+.order-total{font-weight:700;font-size:15px;color:var(--primary)}
+
+/* Profile */
+.profile-header{text-align:center;padding:30px 20px;background:linear-gradient(135deg,var(--primary),var(--primary-light));border-radius:var(--radius);margin-bottom:20px;position:relative}
+.profile-avatar{width:80px;height:80px;border-radius:50%;border:3px solid #fff;object-fit:cover;margin-bottom:10px;background:var(--card)}
+.profile-name{color:#fff;font-size:20px;font-weight:700}
+.profile-phone{color:rgba(255,255,255,0.8);font-size:13px;margin-top:4px}
+.profile-menu-item{display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--card);border-radius:var(--radius-sm);margin-bottom:8px;cursor:pointer;transition:var(--transition);box-shadow:var(--shadow)}
+.profile-menu-item:hover{transform:translateX(4px)}
+.profile-menu-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.profile-menu-text{flex:1}
+.profile-menu-text h4{font-size:14px;font-weight:600}
+.profile-menu-text p{font-size:12px;color:var(--text-secondary)}
+.profile-menu-item i.fa-chevron-right{color:var(--text-secondary);font-size:12px}
+
+/* Forms */
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:13px;font-weight:600;margin-bottom:6px}
+.form-group input,.form-group textarea,.form-group select{width:100%;padding:12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-size:14px;background:var(--bg);color:var(--text);outline:none;transition:var(--transition)}
+.form-group input:focus,.form-group textarea:focus{border-color:var(--primary)}
+
+/* Checkout */
+.checkout-section{background:var(--card);border-radius:var(--radius);padding:16px;margin-bottom:14px;box-shadow:var(--shadow)}
+.checkout-section h3{font-size:16px;font-weight:700;margin-bottom:12px}
+
+/* Toast */
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-100px);background:var(--text);color:var(--bg);padding:12px 24px;border-radius:var(--radius-sm);font-size:14px;font-weight:600;z-index:9999;transition:transform .4s cubic-bezier(.4,0,.2,1);max-width:90%}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+/* Skeleton */
+.skeleton{background:linear-gradient(90deg,var(--border) 25%,rgba(255,255,255,0.3) 50%,var(--border) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:8px}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* Order Modal */
+.order-modal-content{padding:20px}
+.order-item-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)}
+.order-item-row:last-child{border:none}
+
+/* Dark mode toggle */
+.theme-toggle{display:flex;align-items:center;gap:10px}
+.toggle-switch{width:48px;height:26px;background:var(--border);border-radius:13px;position:relative;cursor:pointer;transition:var(--transition)}
+.toggle-switch.active{background:var(--primary)}
+.toggle-switch::after{content:'';position:absolute;width:22px;height:22px;border-radius:50%;background:#fff;top:2px;left:2px;transition:var(--transition)}
+.toggle-switch.active::after{left:24px}
+
+/* Notification */
+.notif-item{display:flex;gap:12px;padding:12px;background:var(--card);border-radius:var(--radius-sm);margin-bottom:8px;box-shadow:var(--shadow);align-items:flex-start}
+.notif-item.unread{border-left:3px solid var(--primary)}
+.notif-icon{width:36px;height:36px;border-radius:50%;background:rgba(108,99,255,0.1);color:var(--primary);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.notif-text h4{font-size:13px;font-weight:600;margin-bottom:2px}
+.notif-text p{font-size:12px;color:var(--text-secondary)}
+.notif-time{font-size:11px;color:var(--text-secondary);margin-top:4px}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:0;height:0}
+
+/* Favorites page */
+.fav-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+</style>
+</head>
+<body>
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- ======= HOME PAGE ======= -->
+<div class="page active" id="page-home">
+  <div class="header">
+    <h1>🛒 Oila Market</h1>
+    <div class="header-actions">
+      <button class="header-btn" onclick="showPage('notifications')"><i class="fas fa-bell"></i><span class="badge" id="notif-badge"></span></button>
+      <button class="header-btn" onclick="toggleTheme()"><i class="fas fa-moon" id="theme-icon"></i></button>
+    </div>
+  </div>
+  <div class="search-bar">
+    <i class="fas fa-search"></i>
+    <input type="text" placeholder="Mahsulot qidirish..." id="search-input" oninput="searchProducts()">
+  </div>
+  <div class="banner-slider" id="banner-slider"></div>
+  <div class="categories-scroll" id="categories-list"></div>
+  <div class="section-title"><h2>Mahsulotlar</h2></div>
+  <div class="products-grid" id="products-grid"></div>
+</div>
+
+<!-- ======= CART PAGE ======= -->
+<div class="page" id="page-cart">
+  <div class="header"><h1>🛍️ Savat</h1></div>
+  <div id="cart-content"></div>
+</div>
+
+<!-- ======= ORDERS PAGE ======= -->
+<div class="page" id="page-orders">
+  <div class="header"><h1>📦 Buyurtmalar</h1></div>
+  <div id="orders-content"></div>
+</div>
+
+<!-- ======= FAVORITES PAGE ======= -->
+<div class="page" id="page-favorites">
+  <div class="header"><h1>❤️ Sevimlilar</h1></div>
+  <div class="fav-grid" id="favorites-grid"></div>
+</div>
+
+<!-- ======= PROFILE PAGE ======= -->
+<div class="page" id="page-profile">
+  <div class="header"><h1>👤 Profil</h1></div>
+  <div id="profile-content"></div>
+</div>
+
+<!-- ======= NOTIFICATIONS PAGE ======= -->
+<div class="page" id="page-notifications">
+  <div class="header">
+    <button class="header-btn" onclick="showPage('home')"><i class="fas fa-arrow-left"></i></button>
+    <h1 style="margin-left:10px">Bildirishnomalar</h1>
+  </div>
+  <div id="notifications-content"></div>
+</div>
+
+<!-- ======= CHECKOUT PAGE ======= -->
+<div class="page" id="page-checkout">
+  <div class="header">
+    <button class="header-btn" onclick="showPage('cart')"><i class="fas fa-arrow-left"></i></button>
+    <h1 style="margin-left:10px">Buyurtma berish</h1>
+  </div>
+  <div id="checkout-content"></div>
+</div>
+
+<!-- ======= EDIT PROFILE PAGE ======= -->
+<div class="page" id="page-edit-profile">
+  <div class="header">
+    <button class="header-btn" onclick="showPage('profile')"><i class="fas fa-arrow-left"></i></button>
+    <h1 style="margin-left:10px">Profilni tahrirlash</h1>
+  </div>
+  <div id="edit-profile-content" style="padding-top:10px"></div>
+</div>
+
+<!-- Product Detail Modal -->
+<div class="modal-overlay" id="product-modal" onclick="closeProductModal()"></div>
+<div class="modal" id="product-modal-content" style="display:none"></div>
+
+<!-- Bottom Navigation -->
+<nav class="bottom-nav">
+  <button class="nav-item active" onclick="showPage('home')"><i class="fas fa-home"></i><span>Bosh</span></button>
+  <button class="nav-item" onclick="showPage('cart')"><i class="fas fa-shopping-cart"></i><span>Savat</span><span class="badge" id="cart-badge"></span></button>
+  <button class="nav-item" onclick="showPage('orders')"><i class="fas fa-box"></i><span>Buyurtmalar</span></button>
+  <button class="nav-item" onclick="showPage('favorites')"><i class="fas fa-heart"></i><span>Sevimli</span></button>
+  <button class="nav-item" onclick="showPage('profile')"><i class="fas fa-user"></i><span>Profil</span></button>
+</nav>
+
+<script>
+const API='https://script.google.com/macros/s/AKfycbyaCpT21CZ1d5gi-rvdBSB9YucigLoNLkNgQJf93kZFIn2e_UiETdZ4Vw2wxnWZZD2G/exec';
+let currentUser=JSON.parse(localStorage.getItem('oila_user'))||null;
+let allProducts=[],allCategories=[],cartItems=[],favorites=[],bannerInterval,currentBanner=0;
+
+// ============ API HELPER ============
+async function api(action,body={}){
+  try{
+    const res=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action,...body}),mode:'no-cors'});
+    // no-cors mode doesn't let us read response, use GET fallback
+    const res2=await fetch(API+'?action='+action+'&'+new URLSearchParams(body).toString());
+    return await res2.json();
+  }catch(e){
+    try{
+      const res=await fetch(API+'?action='+action+'&'+new URLSearchParams(body).toString());
+      return await res.json();
+    }catch(e2){return{success:false,error:e2.message}}
+  }
+}
+async function apiPost(action,body={}){
+  try{
+    await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action,...body}),mode:'no-cors'});
+    // Small delay then fetch result
+    await new Promise(r=>setTimeout(r,500));
+    return await api(action.includes('get')?action:'getProducts',{});
+  }catch(e){return{success:false,error:e.message}}
+}
+async function apiCall(action,params={}){
+  const url=API+'?action='+action+'&'+new URLSearchParams(params).toString();
+  try{const r=await fetch(url);return await r.json();}catch(e){return{success:false,error:e.message}}
+}
+
+// ============ INIT ============
+async function init(){
+  if(!currentUser){
+    currentUser={id:'U'+Date.now(),telegramId:'tg_'+Date.now(),name:'Mehmon',phone:'',address:'',avatar:'',role:'user',isActive:true};
+    localStorage.setItem('oila_user',JSON.stringify(currentUser));
+  }
+  const saved=localStorage.getItem('oila_theme');
+  if(saved==='dark')document.documentElement.setAttribute('data-theme','dark');
+  loadCategories();loadProducts();loadBanners();loadCart();loadNotifications();
+}
+
+// ============ THEME ============
+function toggleTheme(){
+  const isDark=document.documentElement.getAttribute('data-theme')==='dark';
+  document.documentElement.setAttribute('data-theme',isDark?'':'dark');
+  localStorage.setItem('oila_theme',isDark?'light':'dark');
+  document.getElementById('theme-icon').className=isDark?'fas fa-moon':'fas fa-sun';
+}
+
+// ============ NAVIGATION ============
+function showPage(page){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach((n,i)=>{
+    n.classList.remove('active');
+    const pages=['home','cart','orders','favorites','profile'];
+    if(pages[i]===page)n.classList.add('active');
+  });
+  if(page==='cart')renderCart();
+  if(page==='orders')loadOrders();
+  if(page==='favorites')loadFavorites();
+  if(page==='profile')renderProfile();
+  if(page==='notifications')loadNotificationsPage();
+  if(page==='checkout')renderCheckout();
+  if(page==='edit-profile')renderEditProfile();
+}
+
+// ============ TOAST ============
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+// ============ BANNERS ============
+async function loadBanners(){
+  const r=await apiCall('getBanners');
+  const slider=document.getElementById('banner-slider');
+  if(!r.success||!r.data.length){
+    slider.innerHTML='<div class="banner-slide active" style="background:linear-gradient(135deg,#6C63FF,#FF6584)"><div class="banner-content"><h3>Oila Marketga xush kelibsiz!</h3><p>Eng yaxshi mahsulotlar eng arzon narxlarda</p></div></div>';
+    return;
+  }
+  let html='';
+  r.data.forEach((b,i)=>{
+    html+=`<div class="banner-slide ${i===0?'active':''}" style="background-image:url('${b.image}')"><div class="banner-content"><h3>Oila Market</h3><p>Maxsus takliflar</p></div></div>`;
+  });
+  html+='<div class="banner-dots">';
+  r.data.forEach((_,i)=>html+=`<div class="banner-dot ${i===0?'active':''}" onclick="goToBanner(${i})"></div>`);
+  html+='</div>';
+  slider.innerHTML=html;
+  if(r.data.length>1){bannerInterval=setInterval(()=>nextBanner(r.data.length),4000)}
+}
+function nextBanner(total){
+  document.querySelectorAll('.banner-slide').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.banner-dot').forEach(d=>d.classList.remove('active'));
+  currentBanner=(currentBanner+1)%total;
+  document.querySelectorAll('.banner-slide')[currentBanner]?.classList.add('active');
+  document.querySelectorAll('.banner-dot')[currentBanner]?.classList.add('active');
+}
+function goToBanner(i){
+  clearInterval(bannerInterval);currentBanner=i;
+  document.querySelectorAll('.banner-slide').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.banner-dot').forEach(d=>d.classList.remove('active'));
+  document.querySelectorAll('.banner-slide')[i]?.classList.add('active');
+  document.querySelectorAll('.banner-dot')[i]?.classList.add('active');
+}
+
+// ============ CATEGORIES ============
+async function loadCategories(){
+  const r=await apiCall('getCategories');
+  if(!r.success)return;
+  allCategories=r.data;
+  const el=document.getElementById('categories-list');
+  let html='<div class="cat-chip active" onclick="filterCategory(\'all\',this)"><span class="icon">🏪</span><span>Barchasi</span></div>';
+  r.data.forEach(c=>{
+    html+=`<div class="cat-chip" onclick="filterCategory('${c.name}',this)"><span class="icon">${c.icon||'📦'}</span><span>${c.name}</span></div>`;
+  });
+  el.innerHTML=html;
+}
+function filterCategory(cat,el){
+  document.querySelectorAll('.cat-chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  renderProducts(cat);
+}
+
+// ============ PRODUCTS ============
+async function loadProducts(){
+  const r=await apiCall('getProducts',{activeOnly:'true'});
+  if(!r.success)return;
+  allProducts=r.data;
+  renderProducts('all');
+}
+function renderProducts(category){
+  const grid=document.getElementById('products-grid');
+  let prods=category==='all'?allProducts:allProducts.filter(p=>p.category===category);
+  if(!prods.length){grid.innerHTML='<div class="empty-state" style="grid-column:1/-1"><i class="fas fa-box-open"></i><h3>Mahsulot topilmadi</h3></div>';return;}
+  grid.innerHTML=prods.map(p=>`
+    <div class="product-card" onclick="openProduct('${p.id}')">
+      <button class="fav-btn ${isFav(p.id)?'active':''}" onclick="event.stopPropagation();toggleFav('${p.id}')"><i class="fas fa-heart"></i></button>
+      <img class="product-img" src="${p.image||'https://via.placeholder.com/200x160?text=No+Image'}" alt="${p.name}" onerror="this.src='https://via.placeholder.com/200x160?text=No+Image'">
+      <div class="product-info">
+        <div class="product-name">${p.name}</div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span class="product-price">${formatPrice(p.price)}</span>
+          ${p.oldPrice?`<span class="product-old-price">${formatPrice(p.oldPrice)}</span>`:''}
+        </div>
+        <div class="product-rating"><i class="fas fa-star"></i> ${p.rating||'0'} | ${p.sold||0} sotilgan</div>
+      </div>
+      <button class="add-cart-btn" onclick="event.stopPropagation();addToCart('${p.id}')"><i class="fas fa-plus"></i></button>
+    </div>
+  `).join('');
+}
+function searchProducts(){
+  const q=document.getElementById('search-input').value.toLowerCase();
+  const grid=document.getElementById('products-grid');
+  let prods=allProducts.filter(p=>(p.name||'').toLowerCase().includes(q)||(p.description||'').toLowerCase().includes(q)||(p.category||'').toLowerCase().includes(q));
+  if(!prods.length){grid.innerHTML='<div class="empty-state" style="grid-column:1/-1"><i class="fas fa-search"></i><h3>Hech narsa topilmadi</h3></div>';return;}
+  grid.innerHTML=prods.map(p=>`
+    <div class="product-card" onclick="openProduct('${p.id}')">
+      <button class="fav-btn ${isFav(p.id)?'active':''}" onclick="event.stopPropagation();toggleFav('${p.id}')"><i class="fas fa-heart"></i></button>
+      <img class="product-img" src="${p.image||'https://via.placeholder.com/200x160?text=No+Image'}" alt="${p.name}" onerror="this.src='https://via.placeholder.com/200x160?text=No+Image'">
+      <div class="product-info">
+        <div class="product-name">${p.name}</div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span class="product-price">${formatPrice(p.price)}</span>
+          ${p.oldPrice?`<span class="product-old-price">${formatPrice(p.oldPrice)}</span>`:''}
+        </div>
+        <div class="product-rating"><i class="fas fa-star"></i> ${p.rating||'0'}</div>
+      </div>
+      <button class="add-cart-btn" onclick="event.stopPropagation();addToCart('${p.id}')"><i class="fas fa-plus"></i></button>
+    </div>
+  `).join('');
+}
+function formatPrice(p){return Number(p||0).toLocaleString('uz-UZ')+' so\'m'}
+
+// ============ PRODUCT DETAIL ============
+async function openProduct(id){
+  const p=allProducts.find(x=>x.id===id);
+  if(!p)return;
+  const reviews=await apiCall('getReviews',{productId:id,approvedOnly:'true'});
+  const revs=reviews.success?reviews.data:[];
+  const modal=document.getElementById('product-modal-content');
+  modal.style.display='block';
+  document.getElementById('product-modal').classList.add('active');
+  modal.innerHTML=`
+    <button class="modal-close" onclick="closeProductModal()"><i class="fas fa-times"></i></button>
+    <img class="modal-img" src="${p.image||'https://via.placeholder.com/400x280?text=No+Image'}" onerror="this.src='https://via.placeholder.com/400x280?text=No+Image'">
+    <div class="modal-body">
+      <h2>${p.name}</h2>
+      <div class="modal-price-row">
+        <span class="modal-price">${formatPrice(p.price)}</span>
+        ${p.oldPrice?`<span class="modal-old-price">${formatPrice(p.oldPrice)}</span>`:''}
+      </div>
+      <div class="modal-stats">
+        <div class="modal-stat"><i class="fas fa-star"></i> ${p.rating||0} baho</div>
+        <div class="modal-stat"><i class="fas fa-shopping-bag"></i> ${p.sold||0} sotilgan</div>
+        <div class="modal-stat"><i class="fas fa-box"></i> ${p.stock||0} dona</div>
+      </div>
+      <p class="modal-desc">${p.description||'Mahsulot haqida ma\'lumot yo\'q'}</p>
+      <button class="btn-primary" onclick="addToCart('${p.id}');closeProductModal()"><i class="fas fa-cart-plus"></i> Savatga qo'shish</button>
+      <div class="reviews-section">
+        <h3 style="margin-bottom:12px">Sharhlar (${revs.length})</h3>
+        ${revs.map(r=>`<div class="review-card"><div class="review-header"><span class="review-user">${r.userName}</span><span class="review-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</span></div><div class="review-text">${r.comment}</div><div class="review-date">${new Date(r.createdAt).toLocaleDateString()}</div></div>`).join('')}
+        <div class="write-review">
+          <h4 style="margin-bottom:8px">Sharh yozish</h4>
+          <div class="star-rating" id="star-rating">
+            ${[1,2,3,4,5].map(i=>`<i class="fas fa-star" data-val="${i}" onclick="setRating(${i})"></i>`).join('')}
+          </div>
+          <textarea id="review-text" placeholder="Fikringizni yozing..."></textarea>
+          <button class="btn-primary" style="margin-top:8px" onclick="submitReview('${p.id}')"><i class="fas fa-paper-plane"></i> Yuborish</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+function closeProductModal(){
+  document.getElementById('product-modal').classList.remove('active');
+  document.getElementById('product-modal-content').style.display='none';
+}
+let selectedRating=5;
+function setRating(v){
+  selectedRating=v;
+  document.querySelectorAll('#star-rating i').forEach((s,i)=>{s.classList.toggle('active',i<v)});
+}
+async function submitReview(productId){
+  const comment=document.getElementById('review-text').value.trim();
+  if(!comment){showToast('Sharh yozing');return}
+  await apiCall('addReview',{productId,userId:currentUser.id,userName:currentUser.name,rating:selectedRating,comment});
+  showToast('Sharhingiz yuborildi!');closeProductModal();
+}
+
+// ============ CART ============
+async function loadCart(){
+  const r=await apiCall('getCart',{userId:currentUser.id});
+  cartItems=r.success?r.data:[];
+  updateCartBadge();
+}
+function updateCartBadge(){
+  const b=document.getElementById('cart-badge');
+  const total=cartItems.reduce((s,i)=>s+Number(i.quantity||0),0);
+  b.textContent=total||'';
+}
+async function addToCart(productId){
+  await apiCall('addToCart',{userId:currentUser.id,productId,quantity:1});
+  showToast('Savatga qo\'shildi!');loadCart();
+}
+async function updateCartQty(id,qty){
+  if(qty<1){removeFromCart(id);return}
+  await apiCall('updateCartItem',{id,quantity:qty});loadCart();
+}
+async function removeFromCart(id){
+  await apiCall('removeFromCart',{id});loadCart();renderCart();
+}
+function renderCart(){
+  const el=document.getElementById('cart-content');
+  if(!cartItems.length){
+    el.innerHTML='<div class="empty-state"><i class="fas fa-shopping-cart"></i><h3>Savat bo\'sh</h3><p>Mahsulot qo\'shing</p></div>';return;
+  }
+  let subtotal=0;
+  let html=cartItems.map(item=>{
+    const p=item.product||{};
+    const itemTotal=Number(p.price||0)*Number(item.quantity);
+    subtotal+=itemTotal;
+    return `<div class="cart-item">
+      <img class="cart-item-img" src="${p.image||'https://via.placeholder.com/80'}" onerror="this.src='https://via.placeholder.com/80'">
+      <div class="cart-item-info">
+        <div class="cart-item-name">${p.name||'Mahsulot'}</div>
+        <div class="cart-item-price">${formatPrice(itemTotal)}</div>
+        <div class="qty-control">
+          <button class="qty-btn" onclick="updateCartQty('${item.id}',${Number(item.quantity)-1})">−</button>
+          <span>${item.quantity}</span>
+          <button class="qty-btn" onclick="updateCartQty('${item.id}',${Number(item.quantity)+1})">+</button>
+        </div>
+      </div>
+      <button class="cart-remove" onclick="removeFromCart('${item.id}')"><i class="fas fa-trash"></i></button>
+    </div>`;
+  }).join('');
+  const delivery=10000;
+  html+=`<div class="cart-summary">
+    <div class="cart-summary-row"><span>Mahsulotlar:</span><span>${formatPrice(subtotal)}</span></div>
+    <div class="cart-summary-row"><span>Yetkazib berish:</span><span>${formatPrice(delivery)}</span></div>
+    <div class="cart-summary-row total"><span>Jami:</span><span>${formatPrice(subtotal+delivery)}</span></div>
+  </div>
+  <button class="btn-primary" onclick="showPage('checkout')"><i class="fas fa-check-circle"></i> Buyurtma berish</button>`;
+  el.innerHTML=html;
+}
+
+// ============ CHECKOUT ============
+function renderCheckout(){
+  let subtotal=0;
+  cartItems.forEach(item=>{const p=item.product||{};subtotal+=Number(p.price||0)*Number(item.quantity)});
+  const delivery=10000;
+  document.getElementById('checkout-content').innerHTML=`
+    <div class="checkout-section">
+      <h3><i class="fas fa-map-marker-alt"></i> Yetkazib berish manzili</h3>
+      <div class="form-group"><label>Manzil</label><input type="text" id="co-address" value="${currentUser.address||''}" placeholder="Manzilingizni kiriting"></div>
+      <div class="form-group"><label>Telefon</label><input type="tel" id="co-phone" value="${currentUser.phone||''}" placeholder="+998 XX XXX XX XX"></div>
+    </div>
+    <div class="checkout-section">
+      <h3><i class="fas fa-sticky-note"></i> Izoh</h3>
+      <div class="form-group"><textarea id="co-note" placeholder="Qo'shimcha izoh..." rows="3"></textarea></div>
+    </div>
+    <div class="checkout-section">
+      <h3><i class="fas fa-receipt"></i> Buyurtma xulosasi</h3>
+      ${cartItems.map(item=>{const p=item.product||{};return `<div class="order-item-row"><span>${p.name||''} x${item.quantity}</span><span>${formatPrice(Number(p.price||0)*Number(item.quantity))}</span></div>`}).join('')}
+      <div class="order-item-row"><span>Yetkazib berish</span><span>${formatPrice(delivery)}</span></div>
+      <div class="order-item-row" style="font-weight:800;font-size:16px;color:var(--primary)"><span>Jami</span><span>${formatPrice(subtotal+delivery)}</span></div>
+    </div>
+    <button class="btn-primary" onclick="placeOrder()"><i class="fas fa-check-circle"></i> Buyurtmani tasdiqlash</button>
+  `;
+}
+async function placeOrder(){
+  const address=document.getElementById('co-address').value.trim();
+  const phone=document.getElementById('co-phone').value.trim();
+  const note=document.getElementById('co-note').value.trim();
+  if(!address){showToast('Manzil kiriting');return}
+  let subtotal=0;
+  const items=cartItems.map(item=>{const p=item.product||{};const t=Number(p.price||0)*Number(item.quantity);subtotal+=t;return{name:p.name,qty:item.quantity,price:p.price,total:t}});
+  await apiCall('createOrder',{userId:currentUser.id,userName:currentUser.name,items,total:subtotal+10000,address,phone,note});
+  showToast('Buyurtma berildi! 🎉');cartItems=[];updateCartBadge();showPage('orders');
+}
+
+// ============ ORDERS ============
+async function loadOrders(){
+  const r=await apiCall('getUserOrders',{userId:currentUser.id});
+  const el=document.getElementById('orders-content');
+  if(!r.success||!r.data.length){el.innerHTML='<div class="empty-state"><i class="fas fa-box-open"></i><h3>Buyurtmalar yo\'q</h3></div>';return}
+  const statusMap={pending:'Kutilmoqda',confirmed:'Tasdiqlandi',shipping:'Yetkazilmoqda',delivered:'Yetkazildi',cancelled:'Bekor qilindi'};
+  el.innerHTML=r.data.map(o=>{
+    let items=[];try{items=JSON.parse(o.items)}catch(e){}
+    return `<div class="order-card">
+      <div class="order-header"><span class="order-id">#${o.id.slice(-6)}</span><span class="order-status status-${o.status}">${statusMap[o.status]||o.status}</span></div>
+      <div class="order-items-preview">${items.map(i=>i.name+' x'+i.qty).join(', ')}</div>
+      <div class="order-footer"><span>${new Date(o.createdAt).toLocaleDateString('uz')}</span><span class="order-total">${formatPrice(o.total)}</span></div>
+    </div>`;
+  }).join('');
+}
+
+// ============ FAVORITES ============
+function isFav(productId){return favorites.some(f=>f.productId===productId)}
+async function toggleFav(productId){
+  const r=await apiCall('toggleFavorite',{userId:currentUser.id,productId});
+  if(r.success){showToast(r.data.isFavorite?'Sevimlilarga qo\'shildi':'Sevimlilardan olib tashlandi');loadFavorites();loadProducts();}
+}
+async function loadFavorites(){
+  const r=await apiCall('getFavorites',{userId:currentUser.id});
+  favorites=r.success?r.data:[];
+  const grid=document.getElementById('favorites-grid');
+  if(!favorites.length){grid.innerHTML='<div class="empty-state" style="grid-column:1/-1"><i class="fas fa-heart-broken"></i><h3>Sevimlilar bo\'sh</h3></div>';return}
+  grid.innerHTML=favorites.filter(f=>f.product).map(f=>{const p=f.product;return `
+    <div class="product-card" onclick="openProduct('${p.id}')">
+      <button class="fav-btn active" onclick="event.stopPropagation();toggleFav('${p.id}')"><i class="fas fa-heart"></i></button>
+      <img class="product-img" src="${p.image||'https://via.placeholder.com/200x160'}" onerror="this.src='https://via.placeholder.com/200x160'">
+      <div class="product-info"><div class="product-name">${p.name}</div><span class="product-price">${formatPrice(p.price)}</span></div>
+    </div>
+  `}).join('');
+}
+
+// ============ PROFILE ============
+function renderProfile(){
+  const el=document.getElementById('profile-content');
+  el.innerHTML=`
+    <div class="profile-header">
+      <img class="profile-avatar" src="${currentUser.avatar||'https://ui-avatars.com/api/?name='+encodeURIComponent(currentUser.name)+'&background=6C63FF&color=fff'}" onerror="this.src='https://ui-avatars.com/api/?name=User&background=6C63FF&color=fff'">
+      <div class="profile-name">${currentUser.name}</div>
+      <div class="profile-phone">${currentUser.phone||'Telefon qo\'shilmagan'}</div>
+    </div>
+    <div class="profile-menu-item" onclick="showPage('edit-profile')">
+      <div class="profile-menu-icon" style="background:rgba(108,99,255,0.1);color:var(--primary)"><i class="fas fa-user-edit"></i></div>
+      <div class="profile-menu-text"><h4>Profilni tahrirlash</h4><p>Ism, telefon, rasm</p></div>
+      <i class="fas fa-chevron-right"></i>
+    </div>
+    <div class="profile-menu-item" onclick="showPage('edit-profile')">
+      <div class="profile-menu-icon" style="background:rgba(0,201,167,0.1);color:var(--accent)"><i class="fas fa-map-marker-alt"></i></div>
+      <div class="profile-menu-text"><h4>Manzil</h4><p>${currentUser.address||'Qo\'shish'}</p></div>
+      <i class="fas fa-chevron-right"></i>
+    </div>
+    <div class="profile-menu-item" onclick="showPage('orders')">
+      <div class="profile-menu-icon" style="background:rgba(255,101,132,0.1);color:var(--secondary)"><i class="fas fa-box"></i></div>
+      <div class="profile-menu-text"><h4>Buyurtmalarim</h4><p>Barcha buyurtmalar</p></div>
+      <i class="fas fa-chevron-right"></i>
+    </div>
+    <div class="profile-menu-item" onclick="showPage('notifications')">
+      <div class="profile-menu-icon" style="background:rgba(255,193,7,0.1);color:#FFC107"><i class="fas fa-bell"></i></div>
+      <div class="profile-menu-text"><h4>Bildirishnomalar</h4><p>Yangiliklar va xabarnomalar</p></div>
+      <i class="fas fa-chevron-right"></i>
+    </div>
+    <div class="profile-menu-item" onclick="toggleTheme()">
+      <div class="profile-menu-icon" style="background:rgba(108,99,255,0.1);color:var(--primary)"><i class="fas fa-moon"></i></div>
+      <div class="profile-menu-text"><h4>Qorong'u rejim</h4><p>${document.documentElement.getAttribute('data-theme')==='dark'?'Yoqilgan':'O\'chirilgan'}</p></div>
+      <div class="toggle-switch ${document.documentElement.getAttribute('data-theme')==='dark'?'active':''}"></div>
+    </div>
+    <div class="profile-menu-item" onclick="shareApp()">
+      <div class="profile-menu-icon" style="background:rgba(0,201,167,0.1);color:var(--accent)"><i class="fas fa-share-alt"></i></div>
+      <div class="profile-menu-text"><h4>Ulashish</h4><p>Do'stlarga ulashing</p></div>
+      <i class="fas fa-chevron-right"></i>
+    </div>
+    <div class="profile-menu-item" onclick="if(confirm('Chiqishni xohlaysizmi?')){localStorage.removeItem('oila_user');currentUser=null;init();}">
+      <div class="profile-menu-icon" style="background:rgba(255,101,132,0.1);color:var(--secondary)"><i class="fas fa-sign-out-alt"></i></div>
+      <div class="profile-menu-text"><h4>Chiqish</h4><p>Akkauntdan chiqish</p></div>
+      <i class="fas fa-chevron-right"></i>
+    </div>
+  `;
+}
+function renderEditProfile(){
+  document.getElementById('edit-profile-content').innerHTML=`
+    <div style="text-align:center;margin-bottom:20px">
+      <img id="edit-avatar-preview" src="${currentUser.avatar||'https://ui-avatars.com/api/?name='+encodeURIComponent(currentUser.name)+'&background=6C63FF&color=fff'}" style="width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid var(--primary)" onerror="this.src='https://ui-avatars.com/api/?name=User&background=6C63FF&color=fff'">
+      <div style="margin-top:10px">
+        <label style="display:inline-block;padding:8px 16px;background:var(--primary);color:#fff;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600">
+          <i class="fas fa-camera"></i> Rasm yuklash
+          <input type="file" accept="image/*" style="display:none" onchange="uploadAvatar(this)">
+        </label>
+      </div>
+    </div>
+    <div class="form-group"><label>Ism</label><input type="text" id="edit-name" value="${currentUser.name||''}"></div>
+    <div class="form-group"><label>Telefon</label><input type="tel" id="edit-phone" value="${currentUser.phone||''}" placeholder="+998 XX XXX XX XX"></div>
+    <div class="form-group"><label>Manzil</label><input type="text" id="edit-address" value="${currentUser.address||''}" placeholder="Manzilingizni kiriting"></div>
+    <button class="btn-primary" onclick="saveProfile()"><i class="fas fa-save"></i> Saqlash</button>
+  `;
+}
+async function uploadAvatar(input){
+  if(!input.files[0])return;
+  const reader=new FileReader();
+  reader.onload=async function(e){
+    const base64=e.target.result.split(',')[1];
+    document.getElementById('edit-avatar-preview').src=e.target.result;
+    const r=await apiCall('uploadImage',{imageData:base64});
+    if(r.success&&r.data){currentUser.avatar=r.data.url;localStorage.setItem('oila_user',JSON.stringify(currentUser))}
+  };reader.readAsDataURL(input.files[0]);
+}
+async function saveProfile(){
+  const name=document.getElementById('edit-name').value.trim();
+  const phone=document.getElementById('edit-phone').value.trim();
+  const address=document.getElementById('edit-address').value.trim();
+  if(!name){showToast('Ism kiriting');return}
+  await apiCall('updateProfile',{id:currentUser.id,name,phone,address,avatar:currentUser.avatar});
+  currentUser.name=name;currentUser.phone=phone;currentUser.address=address;
+  localStorage.setItem('oila_user',JSON.stringify(currentUser));
+  showToast('Profil saqlandi!');showPage('profile');
+}
+function shareApp(){
+  if(navigator.share){navigator.share({title:'Oila Market',text:'Oila Market - eng yaxshi online do\'kon!',url:window.location.href})}
+  else{navigator.clipboard.writeText(window.location.href);showToast('Havola nusxalandi!')}
+}
+
+// ============ NOTIFICATIONS ============
+async function loadNotifications(){
+  const r=await apiCall('getNotifications',{userId:currentUser.id});
+  if(r.success){
+    const unread=r.data.filter(n=>n.isRead===false||n.isRead==='false').length;
+    document.getElementById('notif-badge').textContent=unread||'';
+  }
+}
+async function loadNotificationsPage(){
+  const r=await apiCall('getNotifications',{userId:currentUser.id});
+  const el=document.getElementById('notifications-content');
+  if(!r.success||!r.data.length){el.innerHTML='<div class="empty-state"><i class="fas fa-bell-slash"></i><h3>Bildirishnomalar yo\'q</h3></div>';return}
+  el.innerHTML=r.data.map(n=>`
+    <div class="notif-item ${n.isRead===false||n.isRead==='false'?'unread':''}">
+      <div class="notif-icon"><i class="fas fa-bell"></i></div>
+      <div class="notif-text" style="flex:1">
+        <h4>${n.title}</h4><p>${n.message}</p>
+        <div class="notif-time">${new Date(n.createdAt).toLocaleString()}</div>
+      </div>
+    </div>
+  `).join('');
+  // Mark all read
+  r.data.filter(n=>n.isRead===false||n.isRead==='false').forEach(n=>apiCall('markNotificationRead',{id:n.id}));
+  document.getElementById('notif-badge').textContent='';
+}
+
+// ============ START ============
+init();
+</script>
+</body>
+</html>
