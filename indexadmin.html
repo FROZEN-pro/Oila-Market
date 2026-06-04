@@ -3,811 +3,461 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Oila Market - Admin Panel</title>
+<title>Oila Market - Admin</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{--primary:#6C63FF;--primary-light:#8B83FF;--primary-dark:#5A52E0;--secondary:#FF6584;--accent:#00C9A7;--warning:#FFC107;--danger:#FF4757;--bg:#F0F2F8;--card:#FFFFFF;--text:#1A1A2E;--text-secondary:#6B7280;--border:#E5E7EB;--shadow:0 2px 12px rgba(0,0,0,0.06);--shadow-lg:0 8px 30px rgba(0,0,0,0.1);--radius:16px;--radius-sm:10px;--sidebar-width:260px;--transition:all .3s cubic-bezier(.4,0,.2,1)}
-[data-theme="dark"]{--bg:#0F0F1A;--card:#1A1A2E;--text:#E5E7EB;--text-secondary:#9CA3AF;--border:#2D2D44;--shadow:0 2px 12px rgba(0,0,0,0.3);--shadow-lg:0 8px 30px rgba(0,0,0,0.4)}
+:root{--primary:#6C63FF;--primary-light:#8B83FF;--primary-dark:#5A52E0;--secondary:#FF6584;--accent:#00C9A7;--warn:#FFC107;--danger:#FF4757;--bg:#F0F2F8;--card:#FFF;--text:#1A1A2E;--text2:#6B7280;--border:#E5E7EB;--shadow:0 2px 12px rgba(0,0,0,.06);--shadow-lg:0 8px 30px rgba(0,0,0,.1);--radius:16px;--radius-sm:10px;--tr:all .3s cubic-bezier(.4,0,.2,1)}
+[data-theme="dark"]{--bg:#0F0F1A;--card:#1A1A2E;--text:#E5E7EB;--text2:#9CA3AF;--border:#2D2D44;--shadow:0 2px 12px rgba(0,0,0,.3);--shadow-lg:0 8px 30px rgba(0,0,0,.4)}
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);transition:var(--transition);display:flex;min-height:100vh}
-
-/* Sidebar */
-.sidebar{width:var(--sidebar-width);background:var(--card);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:100;transition:var(--transition);overflow-y:auto}
-.sidebar-header{padding:24px 20px;border-bottom:1px solid var(--border)}
-.sidebar-header h1{font-size:20px;font-weight:800;background:linear-gradient(135deg,var(--primary),var(--secondary));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.sidebar-header p{font-size:11px;color:var(--text-secondary);margin-top:4px}
-.sidebar-nav{padding:12px;flex:1}
-.nav-group{margin-bottom:8px}
-.nav-group-title{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--text-secondary);padding:8px 12px;letter-spacing:1px}
-.nav-link{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:var(--radius-sm);cursor:pointer;transition:var(--transition);color:var(--text-secondary);font-size:14px;font-weight:500;border:none;background:none;width:100%;text-align:left;font-family:inherit}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);transition:var(--tr);display:flex;min-height:100vh}
+.sidebar{width:250px;background:var(--card);border-right:1px solid var(--border);position:fixed;top:0;left:0;height:100vh;z-index:100;transition:var(--tr);overflow-y:auto;display:flex;flex-direction:column}
+.sb-hdr{padding:20px 18px;border-bottom:1px solid var(--border)}
+.sb-hdr h1{font-size:18px;font-weight:800;background:linear-gradient(135deg,var(--primary),var(--secondary));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.sb-hdr p{font-size:10px;color:var(--text2);margin-top:3px}
+.sb-nav{padding:10px;flex:1}
+.nav-grp{margin-bottom:6px}
+.nav-grp-t{font-size:9px;font-weight:700;text-transform:uppercase;color:var(--text2);padding:6px 10px;letter-spacing:1px}
+.nav-link{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--radius-sm);cursor:pointer;transition:var(--tr);color:var(--text2);font-size:13px;font-weight:500;border:none;background:none;width:100%;text-align:left;font-family:inherit}
 .nav-link:hover{background:var(--bg);color:var(--text)}
-.nav-link.active{background:linear-gradient(135deg,rgba(108,99,255,0.1),rgba(108,99,255,0.05));color:var(--primary);font-weight:600}
-.nav-link i{width:20px;text-align:center;font-size:16px}
-.nav-link .badge-nav{margin-left:auto;background:var(--secondary);color:#fff;font-size:10px;padding:2px 7px;border-radius:10px;font-weight:700}
-.sidebar-footer{padding:16px 20px;border-top:1px solid var(--border)}
-
-/* Main Content */
-.main{margin-left:var(--sidebar-width);flex:1;padding:24px;min-height:100vh;transition:var(--transition)}
-.page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px}
-.page-header h2{font-size:24px;font-weight:800}
-.header-actions{display:flex;gap:10px;align-items:center}
-
-/* Cards */
-.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px}
-.stat-card{background:var(--card);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);transition:var(--transition)}
-.stat-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg)}
-.stat-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:12px}
-.stat-value{font-size:28px;font-weight:800}
-.stat-label{font-size:13px;color:var(--text-secondary);margin-top:2px}
-.stat-change{font-size:12px;font-weight:600;margin-top:6px}
-.stat-change.up{color:var(--accent)}
-.stat-change.down{color:var(--danger)}
-
-/* Table */
-.table-container{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;margin-bottom:24px}
-.table-header{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:10px}
-.table-header h3{font-size:16px;font-weight:700}
-.table-actions{display:flex;gap:8px}
+.nav-link.active{background:linear-gradient(135deg,rgba(108,99,255,.12),rgba(108,99,255,.04));color:var(--primary);font-weight:600}
+.nav-link i{width:18px;text-align:center;font-size:15px}
+.nav-badge{margin-left:auto;background:var(--secondary);color:#fff;font-size:9px;padding:2px 6px;border-radius:8px;font-weight:700}
+.sb-footer{padding:14px 18px;border-top:1px solid var(--border)}
+.main{margin-left:250px;flex:1;padding:20px;min-height:100vh;transition:var(--tr)}
+.pg-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px}
+.pg-hdr h2{font-size:22px;font-weight:800}
+.hdr-acts{display:flex;gap:8px;align-items:center}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:20px}
+.stat-card{background:var(--card);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);transition:var(--tr)}
+.stat-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg)}
+.stat-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:10px}
+.stat-val{font-size:24px;font-weight:800}.stat-lbl{font-size:12px;color:var(--text2);margin-top:2px}
+.stat-sub{font-size:11px;font-weight:600;margin-top:4px}.stat-sub.up{color:var(--accent)}.stat-sub.dn{color:var(--danger)}
+.tbl-wrap{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;margin-bottom:20px}
+.tbl-hdr{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:8px}
+.tbl-hdr h3{font-size:15px;font-weight:700}
 table{width:100%;border-collapse:collapse}
-th{text-align:left;padding:12px 16px;font-size:12px;font-weight:700;text-transform:uppercase;color:var(--text-secondary);border-bottom:1px solid var(--border);letter-spacing:.5px}
-td{padding:12px 16px;font-size:14px;border-bottom:1px solid var(--border);vertical-align:middle}
+th{text-align:left;padding:10px 14px;font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text2);border-bottom:1px solid var(--border);letter-spacing:.5px}
+td{padding:10px 14px;font-size:13px;border-bottom:1px solid var(--border);vertical-align:middle}
 tr:hover{background:var(--bg)}
-.table-img{width:44px;height:44px;border-radius:8px;object-fit:cover}
-
-/* Buttons */
-.btn{padding:8px 16px;border-radius:var(--radius-sm);border:none;font-size:13px;font-weight:600;cursor:pointer;transition:var(--transition);display:inline-flex;align-items:center;gap:6px;font-family:inherit}
-.btn-primary{background:var(--primary);color:#fff}
-.btn-primary:hover{background:var(--primary-dark);transform:translateY(-1px)}
-.btn-success{background:var(--accent);color:#fff}
-.btn-danger{background:var(--danger);color:#fff}
-.btn-warning{background:var(--warning);color:#000}
-.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text)}
-.btn-outline:hover{background:var(--bg)}
-.btn-sm{padding:5px 10px;font-size:12px}
-.btn-icon{width:32px;height:32px;padding:0;display:flex;align-items:center;justify-content:center;border-radius:8px}
-
-/* Forms */
-.form-group{margin-bottom:16px}
-.form-group label{display:block;font-size:13px;font-weight:600;margin-bottom:6px}
-.form-group input,.form-group textarea,.form-group select{width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-size:14px;background:var(--bg);color:var(--text);outline:none;transition:var(--transition)}
-.form-group input:focus,.form-group textarea:focus,.form-group select:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(108,99,255,0.1)}
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-
-/* Modal */
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;align-items:center;justify-content:center}
-.modal-overlay.active{display:flex}
-.modal-content{background:var(--card);border-radius:var(--radius);width:90%;max-width:560px;max-height:90vh;overflow-y:auto;padding:24px;animation:fadeIn .3s ease}
-.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
-.modal-header h3{font-size:18px;font-weight:700}
-.modal-close{background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-secondary);padding:4px}
-
-/* Status Badge */
-.badge-status{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;display:inline-block}
-.badge-pending{background:#FFF3CD;color:#856404}
-.badge-confirmed{background:#D1ECF1;color:#0C5460}
-.badge-shipping{background:#CCE5FF;color:#004085}
-.badge-delivered{background:#D4EDDA;color:#155724}
-.badge-cancelled{background:#F8D7DA;color:#721C24}
-.badge-active{background:#D4EDDA;color:#155724}
-.badge-inactive{background:#F8D7DA;color:#721C24}
-
-/* Search */
-.search-input{padding:8px 14px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;background:var(--bg);color:var(--text);outline:none;width:200px;font-family:inherit}
-
-/* Toast */
-.toast{position:fixed;top:20px;right:20px;background:var(--text);color:var(--bg);padding:12px 24px;border-radius:var(--radius-sm);font-size:14px;font-weight:600;z-index:9999;transform:translateY(-100px);transition:transform .4s ease}
-.toast.show{transform:translateY(0)}
-
-/* Chart placeholder */
-.chart-card{background:var(--card);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);margin-bottom:24px}
-.chart-card h3{font-size:16px;font-weight:700;margin-bottom:16px}
-
-/* Activity Log */
-.log-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px}
-.log-item:last-child{border:none}
-.log-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
-.log-time{font-size:11px;color:var(--text-secondary);margin-top:2px}
-
-/* Responsive */
-@media(max-width:768px){
-  .sidebar{transform:translateX(-100%)}
-  .sidebar.open{transform:translateX(0)}
-  .main{margin-left:0}
-  .stats-grid{grid-template-columns:repeat(2,1fr)}
-  .form-row{grid-template-columns:1fr}
-  .table-container{overflow-x:auto}
-}
-.mobile-toggle{display:none;position:fixed;top:16px;left:16px;z-index:101;width:40px;height:40px;border-radius:10px;background:var(--card);border:1px solid var(--border);font-size:18px;cursor:pointer;align-items:center;justify-content:center;color:var(--text);box-shadow:var(--shadow)}
-@media(max-width:768px){.mobile-toggle{display:flex}}
-
-/* Star rating for review approval */
-.stars{color:#FFC107;font-size:14px}
-.img-preview{width:80px;height:80px;border-radius:8px;object-fit:cover;margin-top:8px}
-
-/* Empty state */
-.empty-state{text-align:center;padding:60px 20px}
-.empty-state i{font-size:48px;color:var(--border);margin-bottom:12px}
-.empty-state h3{font-size:16px;margin-bottom:6px}
-.empty-state p{font-size:13px;color:var(--text-secondary)}
-
-/* Animations */
+.tbl-img{width:40px;height:40px;border-radius:8px;object-fit:cover}
+.btn{padding:7px 14px;border-radius:var(--radius-sm);border:none;font-size:12px;font-weight:600;cursor:pointer;transition:var(--tr);display:inline-flex;align-items:center;gap:5px;font-family:inherit}
+.btn-primary{background:var(--primary);color:#fff}.btn-primary:hover{background:var(--primary-dark)}
+.btn-success{background:var(--accent);color:#fff}.btn-danger{background:var(--danger);color:#fff}
+.btn-warn{background:var(--warn);color:#000}.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text)}
+.btn-outline:hover{background:var(--bg)}.btn-sm{padding:4px 8px;font-size:11px}
+.btn-icon{width:30px;height:30px;padding:0;display:flex;align-items:center;justify-content:center;border-radius:8px}
+.form-group{margin-bottom:14px}
+.form-group label{display:block;font-size:12px;font-weight:600;margin-bottom:5px}
+.form-group input,.form-group textarea,.form-group select{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-size:13px;background:var(--bg);color:var(--text);outline:none;transition:var(--tr)}
+.form-group input:focus,.form-group textarea:focus,.form-group select:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(108,99,255,.1)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:center;justify-content:center}
+.modal-bg.active{display:flex}
+.modal-c{background:var(--card);border-radius:var(--radius);width:90%;max-width:540px;max-height:90vh;overflow-y:auto;padding:22px;animation:fadeIn .3s ease}
+.modal-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.modal-hdr h3{font-size:17px;font-weight:700}
+.modal-close{background:none;border:none;font-size:20px;cursor:pointer;color:var(--text2);padding:4px}
 @keyframes fadeIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
-
-/* Section visibility */
-.section{display:none}
-.section.active{display:block}
+.bs{padding:3px 8px;border-radius:16px;font-size:10px;font-weight:700;display:inline-block}
+.bs-pending{background:#FFF3CD;color:#856404}.bs-confirmed{background:#D1ECF1;color:#0C5460}
+.bs-shipping{background:#CCE5FF;color:#004085}.bs-delivered{background:#D4EDDA;color:#155724}
+.bs-cancelled{background:#F8D7DA;color:#721C24}.bs-active{background:#D4EDDA;color:#155724}
+.bs-inactive{background:#F8D7DA;color:#721C24}
+.search-inp{padding:7px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:12px;background:var(--bg);color:var(--text);outline:none;width:180px;font-family:inherit}
+.toast{position:fixed;top:16px;right:16px;background:var(--text);color:var(--bg);padding:10px 20px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;z-index:9999;transform:translateY(-100px);transition:transform .4s ease}
+.toast.show{transform:translateY(0)}
+.chart-card{background:var(--card);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);margin-bottom:20px}
+.chart-card h3{font-size:15px;font-weight:700;margin-bottom:14px}
+.log-item{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px}
+.log-item:last-child{border:none}
+.log-icon{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.log-time{font-size:10px;color:var(--text2);margin-top:2px}
+.empty{text-align:center;padding:50px 20px}
+.empty i{font-size:40px;color:var(--border);margin-bottom:10px}
+.empty h3{font-size:15px;margin-bottom:5px}.empty p{font-size:12px;color:var(--text2)}
+.img-preview{width:70px;height:70px;border-radius:8px;object-fit:cover;margin-top:6px}
+.stars{color:#FFC107;font-size:13px}
+.section{display:none}.section.active{display:block}
+.mob-tog{display:none;position:fixed;top:14px;left:14px;z-index:101;width:38px;height:38px;border-radius:10px;background:var(--card);border:1px solid var(--border);font-size:16px;cursor:pointer;align-items:center;justify-content:center;color:var(--text);box-shadow:var(--shadow)}
+@media(max-width:768px){.sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.main{margin-left:0;width:100%}.stats-grid{grid-template-columns:repeat(2,1fr)}.form-row{grid-template-columns:1fr}.mob-tog{display:flex}table{font-size:11px}th,td{padding:8px 10px}}
+.chat-box{display:flex;flex-direction:column;height:400px;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.chat-msgs{flex:1;overflow-y:auto;padding:10px}
+.chat-msg{margin-bottom:8px;max-width:80%}
+.chat-msg.user{margin-left:auto;text-align:right}
+.chat-msg .bubble{display:inline-block;padding:8px 12px;border-radius:12px;font-size:12px;line-height:1.4}
+.chat-msg.user .bubble{background:var(--primary);color:#fff;border-bottom-right-radius:4px}
+.chat-msg.admin .bubble{background:var(--bg);color:var(--text);border-bottom-left-radius:4px}
+.chat-msg .meta{font-size:10px;color:var(--text2);margin-top:2px}
+.chat-input{display:flex;gap:6px;padding:10px;border-top:1px solid var(--border)}
+.chat-input input{flex:1;padding:8px;border:1px solid var(--border);border-radius:16px;font-family:inherit;font-size:12px;background:var(--bg);color:var(--text);outline:none}
+.chat-input button{width:36px;height:36px;border-radius:50%;background:var(--primary);color:#fff;border:none;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center}
 </style>
 </head>
 <body>
-<!-- Mobile Toggle -->
-<button class="mobile-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
-
-<!-- Sidebar -->
+<button class="mob-tog" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
 <aside class="sidebar" id="sidebar">
-  <div class="sidebar-header">
-    <h1>🛒 Oila Market</h1>
-    <p>Admin Boshqaruv Paneli</p>
-  </div>
-  <nav class="sidebar-nav">
-    <div class="nav-group">
-      <div class="nav-group-title">Asosiy</div>
-      <button class="nav-link active" onclick="showSection('dashboard',this)"><i class="fas fa-chart-pie"></i> Dashboard</button>
-      <button class="nav-link" onclick="showSection('products',this)"><i class="fas fa-box"></i> Mahsulotlar <span class="badge-nav" id="prod-count"></span></button>
-      <button class="nav-link" onclick="showSection('categories',this)"><i class="fas fa-tags"></i> Kategoriyalar</button>
+  <div class="sb-hdr"><h1>🛒 Oila Market</h1><p>Admin Boshqaruv Paneli</p></div>
+  <nav class="sb-nav">
+    <div class="nav-grp"><div class="nav-grp-t">Asosiy</div>
+      <button class="nav-link active" onclick="show('dashboard',this)"><i class="fas fa-chart-pie"></i>Dashboard</button>
+      <button class="nav-link" onclick="show('products',this)"><i class="fas fa-box"></i>Mahsulotlar<span class="nav-badge" id="prod-cnt"></span></button>
+      <button class="nav-link" onclick="show('categories',this)"><i class="fas fa-tags"></i>Kategoriyalar</button>
     </div>
-    <div class="nav-group">
-      <div class="nav-group-title">Savdo</div>
-      <button class="nav-link" onclick="showSection('orders',this)"><i class="fas fa-shopping-bag"></i> Buyurtmalar <span class="badge-nav" id="order-count"></span></button>
-      <button class="nav-link" onclick="showSection('users',this)"><i class="fas fa-users"></i> Foydalanuvchilar</button>
+    <div class="nav-grp"><div class="nav-grp-t">Savdo</div>
+      <button class="nav-link" onclick="show('orders',this)"><i class="fas fa-shopping-bag"></i>Buyurtmalar<span class="nav-badge" id="ord-cnt"></span></button>
+      <button class="nav-link" onclick="show('users',this)"><i class="fas fa-users"></i>Foydalanuvchilar</button>
+      <button class="nav-link" onclick="show('promos',this)"><i class="fas fa-ticket-alt"></i>Promokodlar</button>
     </div>
-    <div class="nav-group">
-      <div class="nav-group-title">Kontent</div>
-      <button class="nav-link" onclick="showSection('reviews',this)"><i class="fas fa-star"></i> Sharhlar</button>
-      <button class="nav-link" onclick="showSection('banners',this)"><i class="fas fa-image"></i> Bannerlar</button>
-      <button class="nav-link" onclick="showSection('notifications',this)"><i class="fas fa-bell"></i> Bildirishnomalar</button>
+    <div class="nav-grp"><div class="nav-grp-t">Kontent</div>
+      <button class="nav-link" onclick="show('reviews',this)"><i class="fas fa-star"></i>Sharhlar</button>
+      <button class="nav-link" onclick="show('banners',this)"><i class="fas fa-image"></i>Bannerlar</button>
+      <button class="nav-link" onclick="show('notifications',this)"><i class="fas fa-bell"></i>Bildirishnomalar</button>
     </div>
-    <div class="nav-group">
-      <div class="nav-group-title">Tizim</div>
-      <button class="nav-link" onclick="showSection('settings',this)"><i class="fas fa-cog"></i> Sozlamalar</button>
-      <button class="nav-link" onclick="showSection('activity',this)"><i class="fas fa-history"></i> Faoliyat jurnali</button>
+    <div class="nav-grp"><div class="nav-grp-t">Tizim</div>
+      <button class="nav-link" onclick="show('support',this)"><i class="fas fa-headset"></i>Support Chat</button>
+      <button class="nav-link" onclick="show('settings',this)"><i class="fas fa-cog"></i>Sozlamalar</button>
+      <button class="nav-link" onclick="show('activity',this)"><i class="fas fa-history"></i>Faoliyat jurnali</button>
     </div>
   </nav>
-  <div class="sidebar-footer">
-    <button class="nav-link" onclick="toggleTheme()"><i class="fas fa-moon" id="theme-icon"></i> Qorong'u rejim</button>
-    <button class="nav-link" onclick="window.open('https://frozen-pro.github.io/Oila-Market/','_blank')"><i class="fas fa-external-link-alt"></i> Saytni ochish</button>
+  <div class="sb-footer">
+    <button class="nav-link" onclick="toggleTheme()"><i class="fas fa-moon" id="theme-icon"></i>Qorong'u rejim</button>
+    <button class="nav-link" onclick="window.open(location.href.replace('indexadmin.html',''),'_blank')"><i class="fas fa-external-link-alt"></i>User app</button>
   </div>
 </aside>
 
-<!-- Main Content -->
 <main class="main">
-  <!-- DASHBOARD -->
-  <div class="section active" id="sec-dashboard">
-    <div class="page-header"><h2>📊 Dashboard</h2>
-      <div class="header-actions">
-        <button class="btn btn-outline" onclick="refreshDashboard()"><i class="fas fa-sync-alt"></i> Yangilash</button>
-        <button class="btn btn-outline" onclick="toggleTheme()"><i class="fas fa-moon"></i></button>
-      </div>
-    </div>
-    <div class="stats-grid" id="stats-grid"></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-      <div class="chart-card"><h3>📦 So'nggi buyurtmalar</h3><div id="recent-orders"></div></div>
-      <div class="chart-card"><h3>⚠️ Kam qolgan mahsulotlar</h3><div id="low-stock"></div></div>
-    </div>
+<!-- DASHBOARD -->
+<div class="section active" id="sec-dashboard">
+  <div class="pg-hdr"><h2>📊 Dashboard</h2><div class="hdr-acts"><button class="btn btn-outline" onclick="refreshDash()"><i class="fas fa-sync-alt"></i> Yangilash</button><button class="btn btn-outline" onclick="toggleTheme()"><i class="fas fa-moon"></i></button></div></div>
+  <div class="stats-grid" id="stats-grid"></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+    <div class="chart-card"><h3>📦 So'nggi buyurtmalar</h3><div id="recent-ords"></div></div>
+    <div class="chart-card"><h3>⚠️ Kam qolgan</h3><div id="low-stock"></div></div>
   </div>
+</div>
 
-  <!-- PRODUCTS -->
-  <div class="section" id="sec-products">
-    <div class="page-header"><h2>📦 Mahsulotlar</h2>
-      <div class="header-actions">
-        <input class="search-input" placeholder="Qidirish..." id="prod-search" oninput="filterProducts()">
-        <button class="btn btn-primary" onclick="openProductModal()"><i class="fas fa-plus"></i> Qo'shish</button>
-      </div>
-    </div>
-    <div class="table-container">
-      <table><thead><tr><th>Rasm</th><th>Nomi</th><th>Kategoriya</th><th>Narx</th><th>Zaxira</th><th>Reyting</th><th>Holat</th><th>Amallar</th></tr></thead>
-      <tbody id="products-table"></tbody></table>
-    </div>
-  </div>
+<!-- PRODUCTS -->
+<div class="section" id="sec-products">
+  <div class="pg-hdr"><h2>📦 Mahsulotlar</h2><div class="hdr-acts"><input class="search-inp" placeholder="Qidirish..." id="prod-search" oninput="filterProds()"><button class="btn btn-primary" onclick="openProdModal()"><i class="fas fa-plus"></i> Qo'shish</button></div></div>
+  <div class="tbl-wrap"><table><thead><tr><th>Rasm</th><th>Nomi</th><th>Kategoriya</th><th>Narx</th><th>Zaxira</th><th>Reyting</th><th>Holat</th><th>Amallar</th></tr></thead><tbody id="prod-tbl"></tbody></table></div>
+</div>
 
-  <!-- CATEGORIES -->
-  <div class="section" id="sec-categories">
-    <div class="page-header"><h2>🏷️ Kategoriyalar</h2>
-      <button class="btn btn-primary" onclick="openCategoryModal()"><i class="fas fa-plus"></i> Qo'shish</button>
-    </div>
-    <div class="table-container">
-      <table><thead><tr><th>Ikonka</th><th>Nomi</th><th>Holat</th><th>Tartib</th><th>Amallar</th></tr></thead>
-      <tbody id="categories-table"></tbody></table>
-    </div>
-  </div>
+<!-- CATEGORIES -->
+<div class="section" id="sec-categories">
+  <div class="pg-hdr"><h2>🏷️ Kategoriyalar</h2><button class="btn btn-primary" onclick="openCatModal()"><i class="fas fa-plus"></i> Qo'shish</button></div>
+  <div class="tbl-wrap"><table><thead><tr><th>Ikonka</th><th>Nomi</th><th>Holat</th><th>Tartib</th><th>Amallar</th></tr></thead><tbody id="cat-tbl"></tbody></table></div>
+</div>
 
-  <!-- ORDERS -->
-  <div class="section" id="sec-orders">
-    <div class="page-header"><h2>🛍️ Buyurtmalar</h2>
-      <div class="header-actions">
-        <select class="search-input" id="order-filter" onchange="loadOrders()" style="width:auto">
-          <option value="all">Barchasi</option><option value="pending">Kutilmoqda</option><option value="confirmed">Tasdiqlangan</option><option value="shipping">Yetkazilmoqda</option><option value="delivered">Yetkazilgan</option><option value="cancelled">Bekor qilingan</option>
-        </select>
-      </div>
-    </div>
-    <div class="table-container">
-      <table><thead><tr><th>ID</th><th>Mijoz</th><th>Mahsulotlar</th><th>Summa</th><th>Holat</th><th>Sana</th><th>Amallar</th></tr></thead>
-      <tbody id="orders-table"></tbody></table>
-    </div>
-  </div>
+<!-- ORDERS -->
+<div class="section" id="sec-orders">
+  <div class="pg-hdr"><h2>🛍️ Buyurtmalar</h2><div class="hdr-acts"><select class="search-inp" id="ord-filter" onchange="loadOrders()" style="width:auto"><option value="all">Barchasi</option><option value="pending">Kutilmoqda</option><option value="confirmed">Tasdiqlangan</option><option value="shipping">Yetkazilmoqda</option><option value="delivered">Yetkazilgan</option><option value="cancelled">Bekor</option></select></div></div>
+  <div class="tbl-wrap"><table><thead><tr><th>ID</th><th>Mijoz</th><th>Mahsulotlar</th><th>Summa</th><th>Tur</th><th>Holat</th><th>Sana</th><th>Amallar</th></tr></thead><tbody id="ord-tbl"></tbody></table></div>
+</div>
 
-  <!-- USERS -->
-  <div class="section" id="sec-users">
-    <div class="page-header"><h2>👥 Foydalanuvchilar</h2></div>
-    <div class="table-container">
-      <table><thead><tr><th>Rasm</th><th>Ism</th><th>Telefon</th><th>Manzil</th><th>Sana</th><th>Holat</th><th>Amallar</th></tr></thead>
-      <tbody id="users-table"></tbody></table>
-    </div>
-  </div>
+<!-- USERS -->
+<div class="section" id="sec-users">
+  <div class="pg-hdr"><h2>👥 Foydalanuvchilar</h2></div>
+  <div class="tbl-wrap"><table><thead><tr><th>Rasm</th><th>Ism</th><th>Username</th><th>Telefon</th><th>Manzil</th><th>Sana</th><th>Holat</th><th>Amallar</th></tr></thead><tbody id="usr-tbl"></tbody></table></div>
+</div>
 
-  <!-- REVIEWS -->
-  <div class="section" id="sec-reviews">
-    <div class="page-header"><h2>⭐ Sharhlar</h2></div>
-    <div class="table-container">
-      <table><thead><tr><th>Foydalanuvchi</th><th>Mahsulot</th><th>Baho</th><th>Sharh</th><th>Sana</th><th>Holat</th><th>Amallar</th></tr></thead>
-      <tbody id="reviews-table"></tbody></table>
-    </div>
-  </div>
+<!-- PROMOS -->
+<div class="section" id="sec-promos">
+  <div class="pg-hdr"><h2>🎫 Promokodlar</h2><button class="btn btn-primary" onclick="openPromoModal()"><i class="fas fa-plus"></i> Qo'shish</button></div>
+  <div class="tbl-wrap"><table><thead><tr><th>Kod</th><th>Chegirma</th><th>Tur</th><th>Ishlatilgan</th><th>Limit</th><th>Holat</th><th>Amallar</th></tr></thead><tbody id="promo-tbl"></tbody></table></div>
+</div>
 
-  <!-- BANNERS -->
-  <div class="section" id="sec-banners">
-    <div class="page-header"><h2>🖼️ Bannerlar</h2>
-      <button class="btn btn-primary" onclick="openBannerModal()"><i class="fas fa-plus"></i> Qo'shish</button>
-    </div>
-    <div class="table-container">
-      <table><thead><tr><th>Rasm</th><th>Havola</th><th>Mahsulot</th><th>Holat</th><th>Amallar</th></tr></thead>
-      <tbody id="banners-table"></tbody></table>
-    </div>
-  </div>
+<!-- REVIEWS -->
+<div class="section" id="sec-reviews">
+  <div class="pg-hdr"><h2>⭐ Sharhlar</h2></div>
+  <div class="tbl-wrap"><table><thead><tr><th>Foydalanuvchi</th><th>Mahsulot</th><th>Baho</th><th>Sharh</th><th>Sana</th><th>Holat</th><th>Amallar</th></tr></thead><tbody id="rev-tbl"></tbody></table></div>
+</div>
 
-  <!-- NOTIFICATIONS -->
-  <div class="section" id="sec-notifications">
-    <div class="page-header"><h2>🔔 Bildirishnomalar</h2>
-      <button class="btn btn-primary" onclick="openNotifModal()"><i class="fas fa-plus"></i> Yuborish</button>
-    </div>
-    <div class="table-container">
-      <table><thead><tr><th>Sarlavha</th><th>Xabar</th><th>Qabul qiluvchi</th><th>Sana</th><th>Amallar</th></tr></thead>
-      <tbody id="notifs-table"></tbody></table>
-    </div>
-  </div>
+<!-- BANNERS -->
+<div class="section" id="sec-banners">
+  <div class="pg-hdr"><h2>🖼️ Bannerlar</h2><button class="btn btn-primary" onclick="openBanModal()"><i class="fas fa-plus"></i> Qo'shish</button></div>
+  <div class="tbl-wrap"><table><thead><tr><th>Rasm</th><th>Havola</th><th>Mahsulot</th><th>Holat</th><th>Amallar</th></tr></thead><tbody id="ban-tbl"></tbody></table></div>
+</div>
 
-  <!-- SETTINGS -->
-  <div class="section" id="sec-settings">
-    <div class="page-header"><h2>⚙️ Sozlamalar</h2></div>
-    <div class="table-container" style="padding:24px">
-      <div class="form-group"><label>Do'kon nomi</label><input id="set-store-name" value="Oila Market"></div>
-      <div class="form-group"><label>Telefon raqam</label><input id="set-phone" placeholder="+998 XX XXX XX XX"></div>
-      <div class="form-group"><label>Yetkazib berish narxi</label><input id="set-delivery" type="number" value="10000"></div>
-      <div class="form-group"><label>Valyuta</label><input id="set-currency" value="so'm"></div>
-      <div class="form-group"><label>Telegram bot havolasi</label><input id="set-telegram" placeholder="https://t.me/yourbot"></div>
-      <button class="btn btn-primary" onclick="saveSettings()"><i class="fas fa-save"></i> Saqlash</button>
-    </div>
-  </div>
+<!-- NOTIFICATIONS -->
+<div class="section" id="sec-notifications">
+  <div class="pg-hdr"><h2>🔔 Bildirishnomalar</h2><button class="btn btn-primary" onclick="openNotifModal()"><i class="fas fa-plus"></i> Yuborish</button></div>
+  <div class="tbl-wrap"><table><thead><tr><th>Sarlavha</th><th>Xabar</th><th>Kimga</th><th>Sana</th></tr></thead><tbody id="notif-tbl"></tbody></table></div>
+</div>
 
-  <!-- ACTIVITY LOG -->
-  <div class="section" id="sec-activity">
-    <div class="page-header"><h2>📋 Faoliyat jurnali</h2>
-      <button class="btn btn-outline" onclick="loadActivity()"><i class="fas fa-sync-alt"></i> Yangilash</button>
-    </div>
-    <div class="table-container" style="padding:20px" id="activity-list"></div>
+<!-- SUPPORT -->
+<div class="section" id="sec-support">
+  <div class="pg-hdr"><h2>💬 Support Chat</h2>
+    <div class="hdr-acts"><select class="search-inp" id="sup-user" onchange="loadSupChat()" style="width:auto"><option value="">Foydalanuvchi tanlang</option></select></div>
   </div>
+  <div class="chart-card" id="sup-chat-area"><div class="empty"><i class="fas fa-comments"></i><h3>Foydalanuvchini tanlang</h3></div></div>
+</div>
+
+<!-- SETTINGS -->
+<div class="section" id="sec-settings">
+  <div class="pg-hdr"><h2>⚙️ Sozlamalar</h2></div>
+  <div class="tbl-wrap" style="padding:22px">
+    <div class="form-group"><label>Do'kon nomi</label><input id="s-name" value="Oila Market"></div>
+    <div class="form-group"><label>Telefon</label><input id="s-phone" placeholder="+998 XX XXX XX XX"></div>
+    <div class="form-group"><label>Yetkazish narxi</label><input id="s-del" type="number" value="10000"></div>
+    <div class="form-group"><label>Valyuta</label><input id="s-cur" value="so'm"></div>
+    <div class="form-group"><label>Telegram bot username</label><input id="s-bot" placeholder="YourBotName"></div>
+    <button class="btn btn-primary" onclick="saveSettings()"><i class="fas fa-save"></i> Saqlash</button>
+  </div>
+</div>
+
+<!-- ACTIVITY -->
+<div class="section" id="sec-activity">
+  <div class="pg-hdr"><h2>📋 Faoliyat jurnali</h2><button class="btn btn-outline" onclick="loadActivity()"><i class="fas fa-sync-alt"></i></button></div>
+  <div class="tbl-wrap" style="padding:18px" id="act-list"></div>
+</div>
 </main>
 
-<!-- Product Modal -->
-<div class="modal-overlay" id="modal-product">
-  <div class="modal-content">
-    <div class="modal-header"><h3 id="product-modal-title">Mahsulot qo'shish</h3><button class="modal-close" onclick="closeModal('modal-product')">&times;</button></div>
-    <input type="hidden" id="prod-edit-id">
-    <div class="form-group"><label>Mahsulot nomi</label><input id="prod-name" placeholder="Nomini kiriting"></div>
-    <div class="form-row">
-      <div class="form-group"><label>Kategoriya</label><select id="prod-category"></select></div>
-      <div class="form-group"><label>Zaxira (dona)</label><input id="prod-stock" type="number" value="0"></div>
-    </div>
-    <div class="form-row">
-      <div class="form-group"><label>Narx (so'm)</label><input id="prod-price" type="number"></div>
-      <div class="form-group"><label>Eski narx</label><input id="prod-old-price" type="number"></div>
-    </div>
-    <div class="form-group"><label>Rasm URL</label><input id="prod-image" placeholder="https://..."><img id="prod-image-preview" class="img-preview" style="display:none"></div>
-    <div class="form-group"><label>Tavsif</label><textarea id="prod-desc" rows="3" placeholder="Mahsulot haqida..."></textarea></div>
-    <div style="display:flex;gap:8px">
-      <button class="btn btn-primary" onclick="saveProduct()"><i class="fas fa-save"></i> Saqlash</button>
-      <label class="btn btn-outline" style="cursor:pointer"><i class="fas fa-upload"></i> Rasm yuklash<input type="file" accept="image/*" style="display:none" onchange="uploadProductImage(this)"></label>
-    </div>
-  </div>
-</div>
+<!-- PRODUCT MODAL -->
+<div class="modal-bg" id="m-prod"><div class="modal-c"><div class="modal-hdr"><h3 id="pm-title">Mahsulot qo'shish</h3><button class="modal-close" onclick="cm('m-prod')">&times;</button></div>
+  <input type="hidden" id="pm-id">
+  <div class="form-group"><label>Nomi</label><input id="pm-name"></div>
+  <div class="form-row"><div class="form-group"><label>Kategoriya</label><select id="pm-cat"></select></div><div class="form-group"><label>Zaxira</label><input id="pm-stock" type="number" value="0"></div></div>
+  <div class="form-row"><div class="form-group"><label>Narx</label><input id="pm-price" type="number"></div><div class="form-group"><label>Eski narx</label><input id="pm-old" type="number"></div></div>
+  <div class="form-group"><label>Rasm URL</label><input id="pm-img"><img id="pm-img-prev" class="img-preview" style="display:none"></div>
+  <div class="form-group"><label>Tavsif</label><textarea id="pm-desc" rows="3"></textarea></div>
+  <div style="display:flex;gap:8px"><button class="btn btn-primary" onclick="saveProd()"><i class="fas fa-save"></i> Saqlash</button><label class="btn btn-outline" style="cursor:pointer"><i class="fas fa-upload"></i> Yuklash<input type="file" accept="image/*" style="display:none" onchange="uploadPImg(this)"></label></div>
+</div></div>
 
-<!-- Category Modal -->
-<div class="modal-overlay" id="modal-category">
-  <div class="modal-content">
-    <div class="modal-header"><h3 id="cat-modal-title">Kategoriya qo'shish</h3><button class="modal-close" onclick="closeModal('modal-category')">&times;</button></div>
-    <input type="hidden" id="cat-edit-id">
-    <div class="form-group"><label>Nomi</label><input id="cat-name" placeholder="Kategoriya nomi"></div>
-    <div class="form-row">
-      <div class="form-group"><label>Ikonka (emoji)</label><input id="cat-icon" placeholder="📦"></div>
-      <div class="form-group"><label>Tartib raqami</label><input id="cat-order" type="number" value="0"></div>
-    </div>
-    <div class="form-group"><label>Rasm URL</label><input id="cat-image" placeholder="https://..."></div>
-    <button class="btn btn-primary" onclick="saveCategory()"><i class="fas fa-save"></i> Saqlash</button>
-  </div>
-</div>
+<!-- CATEGORY MODAL -->
+<div class="modal-bg" id="m-cat"><div class="modal-c"><div class="modal-hdr"><h3 id="cm-title">Kategoriya qo'shish</h3><button class="modal-close" onclick="cm('m-cat')">&times;</button></div>
+  <input type="hidden" id="cm-id">
+  <div class="form-group"><label>Nomi</label><input id="cm-name"></div>
+  <div class="form-row"><div class="form-group"><label>Ikonka</label><input id="cm-icon" placeholder="📦"></div><div class="form-group"><label>Tartib</label><input id="cm-order" type="number" value="0"></div></div>
+  <div class="form-group"><label>Rasm URL</label><input id="cm-img"></div>
+  <button class="btn btn-primary" onclick="saveCat()"><i class="fas fa-save"></i> Saqlash</button>
+</div></div>
 
-<!-- Banner Modal -->
-<div class="modal-overlay" id="modal-banner">
-  <div class="modal-content">
-    <div class="modal-header"><h3>Banner qo'shish</h3><button class="modal-close" onclick="closeModal('modal-banner')">&times;</button></div>
-    <input type="hidden" id="ban-edit-id">
-    <div class="form-group"><label>Banner rasmi</label><input id="ban-image" placeholder="Rasm URL"><img id="ban-image-preview" class="img-preview" style="display:none"></div>
-    <div class="form-group"><label>Havola (URL)</label><input id="ban-link" placeholder="https://..."></div>
-    <div class="form-row">
-      <div class="form-group"><label>Mahsulot ID</label><input id="ban-product" placeholder="Mahsulot ID"></div>
-      <div class="form-group"><label>Tartib</label><input id="ban-order" type="number" value="0"></div>
-    </div>
-    <div style="display:flex;gap:8px">
-      <button class="btn btn-primary" onclick="saveBanner()"><i class="fas fa-save"></i> Saqlash</button>
-      <label class="btn btn-outline" style="cursor:pointer"><i class="fas fa-upload"></i> Rasm yuklash<input type="file" accept="image/*" style="display:none" onchange="uploadBannerImage(this)"></label>
-    </div>
-  </div>
-</div>
+<!-- BANNER MODAL -->
+<div class="modal-bg" id="m-ban"><div class="modal-c"><div class="modal-hdr"><h3>Banner qo'shish</h3><button class="modal-close" onclick="cm('m-ban')">&times;</button></div>
+  <input type="hidden" id="bm-id">
+  <div class="form-group"><label>Rasm URL</label><input id="bm-img"><img id="bm-img-prev" class="img-preview" style="display:none"></div>
+  <div class="form-row"><div class="form-group"><label>Mahsulot ID</label><input id="bm-prod"></div><div class="form-group"><label>Tartib</label><input id="bm-order" type="number" value="0"></div></div>
+  <div class="form-group"><label>Havola</label><input id="bm-link"></div>
+  <div style="display:flex;gap:8px"><button class="btn btn-primary" onclick="saveBan()"><i class="fas fa-save"></i> Saqlash</button><label class="btn btn-outline" style="cursor:pointer"><i class="fas fa-upload"></i> Yuklash<input type="file" accept="image/*" style="display:none" onchange="uploadBImg(this)"></label></div>
+</div></div>
 
-<!-- Notification Modal -->
-<div class="modal-overlay" id="modal-notif">
-  <div class="modal-content">
-    <div class="modal-header"><h3>Bildirishnoma yuborish</h3><button class="modal-close" onclick="closeModal('modal-notif')">&times;</button></div>
-    <div class="form-group"><label>Sarlavha</label><input id="notif-title" placeholder="Sarlavha"></div>
-    <div class="form-group"><label>Xabar</label><textarea id="notif-message" rows="3" placeholder="Xabar matni..."></textarea></div>
-    <div class="form-group"><label>Qabul qiluvchi</label><select id="notif-target"><option value="all">Barcha foydalanuvchilar</option></select></div>
-    <button class="btn btn-primary" onclick="sendNotif()"><i class="fas fa-paper-plane"></i> Yuborish</button>
-  </div>
-</div>
+<!-- PROMO MODAL -->
+<div class="modal-bg" id="m-promo"><div class="modal-c"><div class="modal-hdr"><h3>Promokod qo'shish</h3><button class="modal-close" onclick="cm('m-promo')">&times;</button></div>
+  <div class="form-group"><label>Kod</label><input id="prom-code" placeholder="CHEGIRMA10"></div>
+  <div class="form-row"><div class="form-group"><label>Chegirma</label><input id="prom-disc" type="number" value="10"></div><div class="form-group"><label>Tur</label><select id="prom-type"><option value="percent">Foiz (%)</option><option value="fixed">Qat'iy (so'm)</option></select></div></div>
+  <div class="form-row"><div class="form-group"><label>Maks ishlatish</label><input id="prom-max" type="number" value="100"></div><div class="form-group"><label>Muddati</label><input id="prom-exp" type="date"></div></div>
+  <button class="btn btn-primary" onclick="savePromo()"><i class="fas fa-save"></i> Saqlash</button>
+</div></div>
 
-<!-- Order Detail Modal -->
-<div class="modal-overlay" id="modal-order-detail">
-  <div class="modal-content">
-    <div class="modal-header"><h3>Buyurtma tafsilotlari</h3><button class="modal-close" onclick="closeModal('modal-order-detail')">&times;</button></div>
-    <div id="order-detail-content"></div>
-  </div>
-</div>
+<!-- NOTIF MODAL -->
+<div class="modal-bg" id="m-notif"><div class="modal-c"><div class="modal-hdr"><h3>Bildirishnoma</h3><button class="modal-close" onclick="cm('m-notif')">&times;</button></div>
+  <div class="form-group"><label>Sarlavha</label><input id="nm-title"></div>
+  <div class="form-group"><label>Xabar</label><textarea id="nm-msg" rows="3"></textarea></div>
+  <div class="form-group"><label>Kimga</label><select id="nm-target"><option value="all">Barchasi</option></select></div>
+  <button class="btn btn-primary" onclick="sendNotif()"><i class="fas fa-paper-plane"></i> Yuborish</button>
+</div></div>
 
-<!-- Toast -->
+<!-- ORDER DETAIL MODAL -->
+<div class="modal-bg" id="m-ord"><div class="modal-c"><div class="modal-hdr"><h3>Buyurtma tafsilotlari</h3><button class="modal-close" onclick="cm('m-ord')">&times;</button></div><div id="ord-detail"></div></div></div>
+
 <div class="toast" id="toast"></div>
 
 <script>
-const API='https://script.google.com/macros/s/AKfycbzReUBabHZO844PjBRYrSB5blyMM9N_uwF4UqjkZlLjsOMrs89PbiZkiGhh-09SJHiH/exec';
-let products=[],categories=[],orders=[],users=[],reviews=[],banners=[];
+const API='https://script.google.com/macros/s/AKfycbzP_L0d0bx_cvgJlMG_dzQnsWrokS8GT_6XXIeaZg-vRPCiuw_vL6dPc3NQX-BFHr3A/exec';
+let products=[],categories=[],orders=[],users=[],reviews=[],banners=[],promos=[];
 
-async function apiCall(action,params={}){
-  const url=API+'?action='+action+'&'+new URLSearchParams(params).toString();
-  try{const r=await fetch(url);return await r.json();}catch(e){return{success:false,error:e.message}}
-}
-
-// ============ INIT ============
-function init(){
-  const saved=localStorage.getItem('admin_theme');
-  if(saved==='dark'){document.documentElement.setAttribute('data-theme','dark');document.getElementById('theme-icon').className='fas fa-sun';}
-  refreshDashboard();
-}
-
-function toggleTheme(){
-  const isDark=document.documentElement.getAttribute('data-theme')==='dark';
-  document.documentElement.setAttribute('data-theme',isDark?'':'dark');
-  localStorage.setItem('admin_theme',isDark?'light':'dark');
-  document.getElementById('theme-icon').className=isDark?'fas fa-moon':'fas fa-sun';
-}
-
-function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open')}
-
-function showSection(name,el){
-  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-  document.getElementById('sec-'+name).classList.add('active');
-  document.querySelectorAll('.nav-link').forEach(n=>n.classList.remove('active'));
-  if(el)el.classList.add('active');
-  document.getElementById('sidebar').classList.remove('open');
-  if(name==='dashboard')refreshDashboard();
-  if(name==='products')loadProducts();
-  if(name==='categories')loadCategories();
-  if(name==='orders')loadOrders();
-  if(name==='users')loadUsers();
-  if(name==='reviews')loadReviews();
-  if(name==='banners')loadBanners();
-  if(name==='notifications')loadNotifs();
-  if(name==='settings')loadSettings();
-  if(name==='activity')loadActivity();
-}
-
-function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)}
-function closeModal(id){document.getElementById(id).classList.remove('active')}
-function openModal(id){document.getElementById(id).classList.add('active')}
-function formatPrice(p){return Number(p||0).toLocaleString('uz-UZ')+" so'm"}
-
-// ============ DASHBOARD ============
-async function refreshDashboard(){
-  const r=await apiCall('getDashboard');
-  if(!r.success)return;
-  const d=r.data;
-  document.getElementById('stats-grid').innerHTML=`
-    <div class="stat-card"><div class="stat-icon" style="background:rgba(108,99,255,0.1);color:var(--primary)"><i class="fas fa-box"></i></div><div class="stat-value">${d.totalProducts}</div><div class="stat-label">Mahsulotlar</div></div>
-    <div class="stat-card"><div class="stat-icon" style="background:rgba(255,101,132,0.1);color:var(--secondary)"><i class="fas fa-shopping-bag"></i></div><div class="stat-value">${d.totalOrders}</div><div class="stat-label">Buyurtmalar</div><div class="stat-change up">${d.pendingOrders} kutilmoqda</div></div>
-    <div class="stat-card"><div class="stat-icon" style="background:rgba(0,201,167,0.1);color:var(--accent)"><i class="fas fa-users"></i></div><div class="stat-value">${d.totalUsers}</div><div class="stat-label">Foydalanuvchilar</div></div>
-    <div class="stat-card"><div class="stat-icon" style="background:rgba(255,193,7,0.1);color:var(--warning)"><i class="fas fa-dollar-sign"></i></div><div class="stat-value">${formatPrice(d.totalRevenue)}</div><div class="stat-label">Umumiy daromad</div></div>
-    <div class="stat-card"><div class="stat-icon" style="background:rgba(108,99,255,0.1);color:var(--primary)"><i class="fas fa-star"></i></div><div class="stat-value">${d.totalReviews}</div><div class="stat-label">Sharhlar</div></div>
-    <div class="stat-card"><div class="stat-icon" style="background:rgba(0,201,167,0.1);color:var(--accent)"><i class="fas fa-calendar-day"></i></div><div class="stat-value">${d.todayOrders}</div><div class="stat-label">Bugungi buyurtmalar</div></div>
-  `;
-  document.getElementById('prod-count').textContent=d.totalProducts;
-  document.getElementById('order-count').textContent=d.pendingOrders;
-  // Recent orders
-  const recent=d.recentOrders||[];
-  document.getElementById('recent-orders').innerHTML=recent.length?recent.map(o=>{
-    const statusMap={pending:'badge-pending',confirmed:'badge-confirmed',shipping:'badge-shipping',delivered:'badge-delivered',cancelled:'badge-cancelled'};
-    return `<div class="log-item"><div class="log-icon" style="background:rgba(108,99,255,0.1);color:var(--primary)"><i class="fas fa-shopping-bag"></i></div><div><strong>#${o.id.slice(-6)}</strong> - ${o.userName||'Mijoz'}<div class="log-time">${formatPrice(o.total)} · <span class="badge-status ${statusMap[o.status]||''}">${o.status}</span></div></div></div>`;
-  }).join(''):'<div class="empty-state"><p>Buyurtmalar yo\'q</p></div>';
-  // Low stock
-  const low=d.lowStock||[];
-  document.getElementById('low-stock').innerHTML=low.length?low.map(p=>`<div class="log-item"><div class="log-icon" style="background:rgba(255,71,87,0.1);color:var(--danger)"><i class="fas fa-exclamation-triangle"></i></div><div><strong>${p.name}</strong><div class="log-time">Zaxira: ${p.stock} dona</div></div></div>`).join(''):'<div class="empty-state"><p>Hammasi joyida 👍</p></div>';
-}
-
-// ============ PRODUCTS ============
-async function loadProducts(){
-  const r=await apiCall('getProducts');
-  if(!r.success)return;
-  products=r.data;
-  renderProducts(products);
-  // Load categories for dropdown
-  const c=await apiCall('getCategories');
-  if(c.success)categories=c.data;
-}
-function renderProducts(prods){
-  document.getElementById('products-table').innerHTML=prods.map(p=>`<tr>
-    <td><img class="table-img" src="${p.image||'https://via.placeholder.com/44'}" onerror="this.src='https://via.placeholder.com/44'"></td>
-    <td><strong>${p.name}</strong></td>
-    <td>${p.category||'-'}</td>
-    <td>${formatPrice(p.price)}</td>
-    <td><span class="badge-status ${Number(p.stock)<5?'badge-cancelled':'badge-active'}">${p.stock||0}</span></td>
-    <td><span class="stars">${'★'.repeat(Math.round(p.rating||0))}</span> ${p.rating||0}</td>
-    <td><span class="badge-status ${p.isActive===true||p.isActive==='true'?'badge-active':'badge-inactive'}">${p.isActive===true||p.isActive==='true'?'Faol':'Nofaol'}</span></td>
-    <td>
-      <button class="btn btn-sm btn-outline" onclick="editProduct('${p.id}')"><i class="fas fa-edit"></i></button>
-      <button class="btn btn-sm btn-danger" onclick="deleteProduct('${p.id}')"><i class="fas fa-trash"></i></button>
-    </td>
-  </tr>`).join('')||'<tr><td colspan="8"><div class="empty-state"><p>Mahsulotlar yo\'q</p></div></td></tr>';
-}
-function filterProducts(){
-  const q=document.getElementById('prod-search').value.toLowerCase();
-  renderProducts(products.filter(p=>(p.name||'').toLowerCase().includes(q)||(p.category||'').toLowerCase().includes(q)));
-}
-function openProductModal(){
-  document.getElementById('product-modal-title').textContent='Mahsulot qo\'shish';
-  document.getElementById('prod-edit-id').value='';
-  ['prod-name','prod-price','prod-old-price','prod-image','prod-desc'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('prod-stock').value='0';
-  document.getElementById('prod-image-preview').style.display='none';
-  updateCategoryDropdown();
-  openModal('modal-product');
-}
-function updateCategoryDropdown(){
-  document.getElementById('prod-category').innerHTML=categories.map(c=>`<option value="${c.name}">${c.icon||''} ${c.name}</option>`).join('')||'<option>Kategoriya yo\'q</option>';
-}
-function editProduct(id){
-  const p=products.find(x=>x.id===id);
-  if(!p)return;
-  document.getElementById('product-modal-title').textContent='Mahsulotni tahrirlash';
-  document.getElementById('prod-edit-id').value=p.id;
-  document.getElementById('prod-name').value=p.name||'';
-  document.getElementById('prod-category').value=p.category||'';
-  document.getElementById('prod-price').value=p.price||'';
-  document.getElementById('prod-old-price').value=p.oldPrice||'';
-  document.getElementById('prod-stock').value=p.stock||0;
-  document.getElementById('prod-image').value=p.image||'';
-  document.getElementById('prod-desc').value=p.description||'';
-  if(p.image){document.getElementById('prod-image-preview').src=p.image;document.getElementById('prod-image-preview').style.display='block';}
-  updateCategoryDropdown();
-  openModal('modal-product');
-}
-async function saveProduct(){
-  const id=document.getElementById('prod-edit-id').value;
-  const data={
-    name:document.getElementById('prod-name').value.trim(),
-    category:document.getElementById('prod-category').value,
-    price:Number(document.getElementById('prod-price').value),
-    oldPrice:Number(document.getElementById('prod-old-price').value)||'',
-    stock:Number(document.getElementById('prod-stock').value),
-    image:document.getElementById('prod-image').value.trim(),
-    description:document.getElementById('prod-desc').value.trim()
-  };
-  if(!data.name){showToast('Nom kiriting');return}
-  if(id){data.id=id;await apiCall('updateProduct',data);}
-  else{await apiCall('addProduct',data);}
-  showToast('Saqlandi!');closeModal('modal-product');loadProducts();
-}
-async function deleteProduct(id){
-  if(!confirm('O\'chirishni xohlaysizmi?'))return;
-  await apiCall('deleteProduct',{id});showToast('O\'chirildi');loadProducts();
-}
-async function uploadProductImage(input){
-  if(!input.files[0])return;
-  const reader=new FileReader();
-  reader.onload=async function(e){
-    document.getElementById('prod-image-preview').src=e.target.result;
-    document.getElementById('prod-image-preview').style.display='block';
-    const base64=e.target.result.split(',')[1];
-    const r=await apiCall('uploadImage',{imageData:base64});
-    if(r.success&&r.data){document.getElementById('prod-image').value=r.data.url;showToast('Rasm yuklandi!')}
-  };reader.readAsDataURL(input.files[0]);
-}
-
-// ============ CATEGORIES ============
-async function loadCategories(){
-  const r=await apiCall('getCategories');
-  if(!r.success)return;
-  categories=r.data;
-  document.getElementById('categories-table').innerHTML=categories.map(c=>`<tr>
-    <td style="font-size:24px">${c.icon||'📦'}</td>
-    <td><strong>${c.name}</strong></td>
-    <td><span class="badge-status ${c.isActive===true||c.isActive==='true'?'badge-active':'badge-inactive'}">${c.isActive===true||c.isActive==='true'?'Faol':'Nofaol'}</span></td>
-    <td>${c.order||0}</td>
-    <td>
-      <button class="btn btn-sm btn-outline" onclick="editCategory('${c.id}')"><i class="fas fa-edit"></i></button>
-      <button class="btn btn-sm btn-danger" onclick="deleteCategory('${c.id}')"><i class="fas fa-trash"></i></button>
-    </td>
-  </tr>`).join('')||'<tr><td colspan="5"><div class="empty-state"><p>Kategoriyalar yo\'q</p></div></td></tr>';
-}
-function openCategoryModal(){
-  document.getElementById('cat-edit-id').value='';
-  ['cat-name','cat-icon','cat-image'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('cat-order').value='0';
-  document.getElementById('cat-modal-title').textContent='Kategoriya qo\'shish';
-  openModal('modal-category');
-}
-function editCategory(id){
-  const c=categories.find(x=>x.id===id);
-  if(!c)return;
-  document.getElementById('cat-modal-title').textContent='Kategoriyani tahrirlash';
-  document.getElementById('cat-edit-id').value=c.id;
-  document.getElementById('cat-name').value=c.name||'';
-  document.getElementById('cat-icon').value=c.icon||'';
-  document.getElementById('cat-image').value=c.image||'';
-  document.getElementById('cat-order').value=c.order||0;
-  openModal('modal-category');
-}
-async function saveCategory(){
-  const id=document.getElementById('cat-edit-id').value;
-  const data={name:document.getElementById('cat-name').value.trim(),icon:document.getElementById('cat-icon').value.trim(),image:document.getElementById('cat-image').value.trim(),order:Number(document.getElementById('cat-order').value)};
-  if(!data.name){showToast('Nom kiriting');return}
-  if(id){data.id=id;await apiCall('updateCategory',data);}
-  else{await apiCall('addCategory',data);}
-  showToast('Saqlandi!');closeModal('modal-category');loadCategories();
-}
-async function deleteCategory(id){
-  if(!confirm('O\'chirishni xohlaysizmi?'))return;
-  await apiCall('deleteCategory',{id});showToast('O\'chirildi');loadCategories();
-}
-
-// ============ ORDERS ============
-async function loadOrders(){
-  const status=document.getElementById('order-filter').value;
-  const r=await apiCall('getOrders',{status});
-  if(!r.success)return;
-  orders=r.data;
-  const statusMap={pending:'badge-pending',confirmed:'badge-confirmed',shipping:'badge-shipping',delivered:'badge-delivered',cancelled:'badge-cancelled'};
-  const statusText={pending:'Kutilmoqda',confirmed:'Tasdiqlandi',shipping:'Yetkazilmoqda',delivered:'Yetkazildi',cancelled:'Bekor qilindi'};
-  document.getElementById('orders-table').innerHTML=orders.map(o=>{
-    let items=[];try{items=JSON.parse(o.items)}catch(e){}
-    return `<tr>
-      <td><strong>#${o.id.slice(-6)}</strong></td>
-      <td>${o.userName||'Mijoz'}</td>
-      <td>${items.map(i=>i.name+' x'+i.qty).join(', ')}</td>
-      <td><strong>${formatPrice(o.total)}</strong></td>
-      <td><span class="badge-status ${statusMap[o.status]||''}">${statusText[o.status]||o.status}</span></td>
-      <td>${new Date(o.createdAt).toLocaleDateString()}</td>
-      <td>
-        <button class="btn btn-sm btn-outline" onclick="viewOrder('${o.id}')"><i class="fas fa-eye"></i></button>
-        <select class="btn btn-sm btn-outline" onchange="changeOrderStatus('${o.id}',this.value)" style="padding:4px 8px;font-size:11px">
-          <option value="">Holat</option>
-          <option value="confirmed">Tasdiqlash</option><option value="shipping">Yetkazish</option><option value="delivered">Yetkazildi</option><option value="cancelled">Bekor</option>
-        </select>
-        <button class="btn btn-sm btn-danger" onclick="deleteOrder('${o.id}')"><i class="fas fa-trash"></i></button>
-      </td>
-    </tr>`;
-  }).join('')||'<tr><td colspan="7"><div class="empty-state"><p>Buyurtmalar yo\'q</p></div></td></tr>';
-}
-function viewOrder(id){
-  const o=orders.find(x=>x.id===id);
-  if(!o)return;
-  let items=[];try{items=JSON.parse(o.items)}catch(e){}
-  document.getElementById('order-detail-content').innerHTML=`
-    <p><strong>Buyurtma ID:</strong> #${o.id.slice(-6)}</p>
-    <p><strong>Mijoz:</strong> ${o.userName}</p>
-    <p><strong>Telefon:</strong> ${o.phone||'-'}</p>
-    <p><strong>Manzil:</strong> ${o.address||'-'}</p>
-    <p><strong>Izoh:</strong> ${o.note||'-'}</p>
-    <hr style="margin:12px 0;border-color:var(--border)">
-    <h4>Mahsulotlar:</h4>
-    ${items.map(i=>`<div style="display:flex;justify-content:space-between;padding:6px 0"><span>${i.name} x${i.qty}</span><span>${formatPrice(i.total)}</span></div>`).join('')}
-    <hr style="margin:12px 0;border-color:var(--border)">
-    <div style="display:flex;justify-content:space-between;font-weight:800;font-size:16px;color:var(--primary)"><span>Jami:</span><span>${formatPrice(o.total)}</span></div>
-    <p style="margin-top:12px;font-size:13px;color:var(--text-secondary)">Sana: ${new Date(o.createdAt).toLocaleString()}</p>
-  `;
-  openModal('modal-order-detail');
-}
-async function changeOrderStatus(id,status){
-  if(!status)return;
-  await apiCall('updateOrderStatus',{id,status});
-  showToast('Holat o\'zgartirildi!');loadOrders();
-}
-async function deleteOrder(id){
-  if(!confirm('O\'chirishni xohlaysizmi?'))return;
-  await apiCall('deleteOrder',{id});showToast('O\'chirildi');loadOrders();
-}
-
-// ============ USERS ============
-async function loadUsers(){
-  const r=await apiCall('getUsers');
-  if(!r.success)return;
-  users=r.data;
-  document.getElementById('users-table').innerHTML=users.map(u=>`<tr>
-    <td><img class="table-img" src="${u.avatar||'https://ui-avatars.com/api/?name='+encodeURIComponent(u.name||'U')+'&background=6C63FF&color=fff'}" onerror="this.src='https://ui-avatars.com/api/?name=User&background=6C63FF&color=fff'"></td>
-    <td><strong>${u.name||'-'}</strong></td>
-    <td>${u.phone||'-'}</td>
-    <td>${u.address||'-'}</td>
-    <td>${u.createdAt?new Date(u.createdAt).toLocaleDateString():'-'}</td>
-    <td><span class="badge-status ${u.isActive===true||u.isActive==='true'?'badge-active':'badge-inactive'}">${u.isActive===true||u.isActive==='true'?'Faol':'Bloklangan'}</span></td>
-    <td>
-      <button class="btn btn-sm ${u.isActive===true||u.isActive==='true'?'btn-danger':'btn-success'}" onclick="toggleUser('${u.id}')">${u.isActive===true||u.isActive==='true'?'Bloklash':'Ochish'}</button>
-    </td>
-  </tr>`).join('')||'<tr><td colspan="7"><div class="empty-state"><p>Foydalanuvchilar yo\'q</p></div></td></tr>';
-}
-async function toggleUser(id){
-  await apiCall('toggleUserStatus',{id});showToast('Holat o\'zgartirildi');loadUsers();
-}
-
-// ============ REVIEWS ============
-async function loadReviews(){
-  const r=await apiCall('getReviews',{});
-  if(!r.success)return;
-  reviews=r.data;
-  document.getElementById('reviews-table').innerHTML=reviews.map(rv=>{
-    const prod=products.find(p=>p.id===rv.productId);
-    return `<tr>
-      <td><strong>${rv.userName||'-'}</strong></td>
-      <td>${prod?prod.name:rv.productId}</td>
-      <td><span class="stars">${'★'.repeat(rv.rating)}${'☆'.repeat(5-rv.rating)}</span></td>
-      <td>${rv.comment||'-'}</td>
-      <td>${new Date(rv.createdAt).toLocaleDateString()}</td>
-      <td><span class="badge-status ${rv.isApproved===true||rv.isApproved==='true'?'badge-active':'badge-pending'}">${rv.isApproved===true||rv.isApproved==='true'?'Tasdiqlangan':'Kutilmoqda'}</span></td>
-      <td>
-        ${!(rv.isApproved===true||rv.isApproved==='true')?`<button class="btn btn-sm btn-success" onclick="approveReview('${rv.id}')"><i class="fas fa-check"></i></button>`:''}
-        <button class="btn btn-sm btn-danger" onclick="deleteReview('${rv.id}')"><i class="fas fa-trash"></i></button>
-      </td>
-    </tr>`;
-  }).join('')||'<tr><td colspan="7"><div class="empty-state"><p>Sharhlar yo\'q</p></div></td></tr>';
-}
-async function approveReview(id){await apiCall('approveReview',{id});showToast('Tasdiqlandi');loadReviews();}
-async function deleteReview(id){if(!confirm('O\'chirilsinmi?'))return;await apiCall('deleteReview',{id});showToast('O\'chirildi');loadReviews();}
-
-// ============ BANNERS ============
-async function loadBanners(){
-  const r=await apiCall('getBanners');
-  if(!r.success)return;
-  banners=r.data;
-  document.getElementById('banners-table').innerHTML=banners.map(b=>`<tr>
-    <td><img class="table-img" src="${b.image||'https://via.placeholder.com/44'}" style="width:80px;height:44px" onerror="this.src='https://via.placeholder.com/80x44'"></td>
-    <td>${b.link||'-'}</td>
-    <td>${b.productId||'-'}</td>
-    <td><span class="badge-status ${b.isActive===true||b.isActive==='true'?'badge-active':'badge-inactive'}">${b.isActive===true||b.isActive==='true'?'Faol':'Nofaol'}</span></td>
-    <td>
-      <button class="btn btn-sm btn-outline" onclick="editBanner('${b.id}')"><i class="fas fa-edit"></i></button>
-      <button class="btn btn-sm btn-danger" onclick="deleteBanner('${b.id}')"><i class="fas fa-trash"></i></button>
-    </td>
-  </tr>`).join('')||'<tr><td colspan="5"><div class="empty-state"><p>Bannerlar yo\'q</p></div></td></tr>';
-}
-function openBannerModal(){
-  document.getElementById('ban-edit-id').value='';
-  ['ban-image','ban-link','ban-product'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('ban-order').value='0';
-  document.getElementById('ban-image-preview').style.display='none';
-  openModal('modal-banner');
-}
-function editBanner(id){
-  const b=banners.find(x=>x.id===id);
-  if(!b)return;
-  document.getElementById('ban-edit-id').value=b.id;
-  document.getElementById('ban-image').value=b.image||'';
-  document.getElementById('ban-link').value=b.link||'';
-  document.getElementById('ban-product').value=b.productId||'';
-  document.getElementById('ban-order').value=b.order||0;
-  if(b.image){document.getElementById('ban-image-preview').src=b.image;document.getElementById('ban-image-preview').style.display='block';}
-  openModal('modal-banner');
-}
-async function saveBanner(){
-  const id=document.getElementById('ban-edit-id').value;
-  const data={image:document.getElementById('ban-image').value.trim(),link:document.getElementById('ban-link').value.trim(),productId:document.getElementById('ban-product').value.trim(),order:Number(document.getElementById('ban-order').value)};
-  if(id){data.id=id;await apiCall('updateBanner',data);}
-  else{await apiCall('addBanner',data);}
-  showToast('Saqlandi!');closeModal('modal-banner');loadBanners();
-}
-async function deleteBanner(id){if(!confirm('O\'chirilsinmi?'))return;await apiCall('deleteBanner',{id});showToast('O\'chirildi');loadBanners();}
-async function uploadBannerImage(input){
-  if(!input.files[0])return;
-  const reader=new FileReader();
-  reader.onload=async function(e){
-    document.getElementById('ban-image-preview').src=e.target.result;
-    document.getElementById('ban-image-preview').style.display='block';
-    const base64=e.target.result.split(',')[1];
-    const r=await apiCall('uploadImage',{imageData:base64});
-    if(r.success&&r.data){document.getElementById('ban-image').value=r.data.url;showToast('Rasm yuklandi!')}
-  };reader.readAsDataURL(input.files[0]);
-}
-
-// ============ NOTIFICATIONS ============
-async function loadNotifs(){
-  const r=await apiCall('getNotifications',{});
-  if(!r.success)return;
-  document.getElementById('notifs-table').innerHTML=r.data.map(n=>`<tr>
-    <td><strong>${n.title}</strong></td>
-    <td>${n.message}</td>
-    <td>${n.userId==='all'?'Barchasi':n.userId}</td>
-    <td>${new Date(n.createdAt).toLocaleString()}</td>
-    <td><button class="btn btn-sm btn-danger" onclick="this.closest('tr').remove()"><i class="fas fa-trash"></i></button></td>
-  </tr>`).join('')||'<tr><td colspan="5"><div class="empty-state"><p>Bildirishnomalar yo\'q</p></div></td></tr>';
-  // Populate target dropdown
-  const u=await apiCall('getUsers');
-  if(u.success){
-    document.getElementById('notif-target').innerHTML='<option value="all">Barcha foydalanuvchilar</option>'+u.data.map(user=>`<option value="${user.id}">${user.name}</option>`).join('');
+async function api(action,params={}){
+  try{
+    const url=API+'?action='+encodeURIComponent(action)+'&'+new URLSearchParams(params).toString();
+    const r=await fetch(url);
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    return await r.json();
+  }catch(e){
+    try{
+      await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action,...params})});
+      await new Promise(r=>setTimeout(r,300));
+      const url=API+'?action='+encodeURIComponent(action)+'&'+new URLSearchParams(params).toString();
+      const r2=await fetch(url);return await r2.json();
+    }catch(e2){return{success:false,error:e2.message}}
   }
 }
-function openNotifModal(){
-  document.getElementById('notif-title').value='';
-  document.getElementById('notif-message').value='';
-  openModal('modal-notif');
+
+function init(){
+  const s=localStorage.getItem('admin_theme');
+  if(s==='dark'){document.documentElement.setAttribute('data-theme','dark');document.getElementById('theme-icon').className='fas fa-sun'}
+  refreshDash();
 }
-async function sendNotif(){
-  const title=document.getElementById('notif-title').value.trim();
-  const message=document.getElementById('notif-message').value.trim();
-  const userId=document.getElementById('notif-target').value;
-  if(!title||!message){showToast('Sarlavha va xabar kiriting');return}
-  await apiCall('sendNotification',{title,message,userId});
-  showToast('Yuborildi!');closeModal('modal-notif');loadNotifs();
+function toggleTheme(){const d=document.documentElement.getAttribute('data-theme')==='dark';document.documentElement.setAttribute('data-theme',d?'':'dark');localStorage.setItem('admin_theme',d?'light':'dark');document.getElementById('theme-icon').className=d?'fas fa-moon':'fas fa-sun'}
+function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open')}
+function show(n,el){document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));document.getElementById('sec-'+n).classList.add('active');document.querySelectorAll('.nav-link').forEach(x=>x.classList.remove('active'));if(el)el.classList.add('active');document.getElementById('sidebar').classList.remove('open');
+  const loaders={dashboard:refreshDash,products:loadProds,categories:loadCats,orders:loadOrders,users:loadUsers,promos:loadPromos,reviews:loadRevs,banners:loadBans,notifications:loadNotifs,support:loadSupUsers,settings:loadSettings,activity:loadActivity};
+  if(loaders[n])loaders[n]();
+}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)}
+function cm(id){document.getElementById(id).classList.remove('active')}
+function om(id){document.getElementById(id).classList.add('active')}
+function fp(p){return Number(p||0).toLocaleString('uz-UZ')+" so'm"}
+function img(s){return s||'https://via.placeholder.com/80/6C63FF/fff?text=OM'}
+
+// ===== DASHBOARD =====
+async function refreshDash(){
+  const r=await api('getDashboard');if(!r.success||!r.data)return;
+  const d=r.data;
+  document.getElementById('stats-grid').innerHTML=`
+    <div class="stat-card"><div class="stat-icon" style="background:rgba(108,99,255,.1);color:var(--primary)"><i class="fas fa-box"></i></div><div class="stat-val">${d.totalProducts}</div><div class="stat-lbl">Mahsulotlar</div></div>
+    <div class="stat-card"><div class="stat-icon" style="background:rgba(255,101,132,.1);color:var(--secondary)"><i class="fas fa-shopping-bag"></i></div><div class="stat-val">${d.totalOrders}</div><div class="stat-lbl">Buyurtmalar</div><div class="stat-sub up">${d.pendingOrders} kutilmoqda</div></div>
+    <div class="stat-card"><div class="stat-icon" style="background:rgba(0,201,167,.1);color:var(--accent)"><i class="fas fa-users"></i></div><div class="stat-val">${d.totalUsers}</div><div class="stat-lbl">Foydalanuvchilar</div></div>
+    <div class="stat-card"><div class="stat-icon" style="background:rgba(255,193,7,.1);color:var(--warn)"><i class="fas fa-dollar-sign"></i></div><div class="stat-val">${fp(d.totalRevenue)}</div><div class="stat-lbl">Daromad</div></div>
+    <div class="stat-card"><div class="stat-icon" style="background:rgba(108,99,255,.1);color:var(--primary)"><i class="fas fa-star"></i></div><div class="stat-val">${d.totalReviews}</div><div class="stat-lbl">Sharhlar</div></div>
+    <div class="stat-card"><div class="stat-icon" style="background:rgba(0,201,167,.1);color:var(--accent)"><i class="fas fa-calendar-day"></i></div><div class="stat-val">${d.todayOrders}</div><div class="stat-lbl">Bugun</div></div>`;
+  document.getElementById('prod-cnt').textContent=d.totalProducts;
+  document.getElementById('ord-cnt').textContent=d.pendingOrders;
+  const rec=d.recentOrders||[];
+  document.getElementById('recent-ords').innerHTML=rec.length?rec.map(o=>{const sc={pending:'bs-pending',confirmed:'bs-confirmed',shipping:'bs-shipping',delivered:'bs-delivered',cancelled:'bs-cancelled'};
+    return `<div class="log-item"><div class="log-icon" style="background:rgba(108,99,255,.1);color:var(--primary)"><i class="fas fa-shopping-bag"></i></div><div><strong>#${(o.id||'').slice(-6)}</strong> - ${o.userName||'Mijoz'}<div class="log-time">${fp(o.total)} · <span class="bs ${sc[o.status]||''}">${o.status}</span></div></div></div>`;
+  }).join(''):'<div class="empty"><p>Buyurtmalar yo\'q</p></div>';
+  const low=d.lowStock||[];
+  document.getElementById('low-stock').innerHTML=low.length?low.map(p=>`<div class="log-item"><div class="log-icon" style="background:rgba(255,71,87,.1);color:var(--danger)"><i class="fas fa-exclamation-triangle"></i></div><div><strong>${p.name}</strong><div class="log-time">Zaxira: ${p.stock}</div></div></div>`).join(''):'<div class="empty"><p>Hammasi joyida 👍</p></div>';
 }
 
-// ============ SETTINGS ============
-async function loadSettings(){
-  const r=await apiCall('getSettings');
-  if(!r.success)return;
-  const s=r.data;
-  document.getElementById('set-store-name').value=s.storeName||'Oila Market';
-  document.getElementById('set-phone').value=s.phone||'';
-  document.getElementById('set-delivery').value=s.deliveryPrice||10000;
-  document.getElementById('set-currency').value=s.currency||"so'm";
-  document.getElementById('set-telegram').value=s.telegramBot||'';
+// ===== PRODUCTS =====
+async function loadProds(){
+  const r=await api('getProducts');if(!r.success)return;
+  products=r.data||[];renderProds(products);
+  const c=await api('getCategories');if(c.success)categories=c.data||[];
 }
-async function saveSettings(){
-  const settings=[
-    {key:'storeName',value:document.getElementById('set-store-name').value},
-    {key:'phone',value:document.getElementById('set-phone').value},
-    {key:'deliveryPrice',value:document.getElementById('set-delivery').value},
-    {key:'currency',value:document.getElementById('set-currency').value},
-    {key:'telegramBot',value:document.getElementById('set-telegram').value}
-  ];
-  for(const s of settings){await apiCall('updateSetting',s);}
-  showToast('Sozlamalar saqlandi!');
+function renderProds(ps){
+  document.getElementById('prod-tbl').innerHTML=ps.map(p=>`<tr>
+    <td><img class="tbl-img" src="${img(p.image)}" onerror="this.src='https://via.placeholder.com/40/6C63FF/fff?text=OM'"></td>
+    <td><strong>${p.name}</strong></td><td>${p.category||'-'}</td><td>${fp(p.price)}</td>
+    <td><span class="bs ${Number(p.stock)<5?'bs-cancelled':'bs-active'}">${p.stock||0}</span></td>
+    <td><span class="stars">${'★'.repeat(Math.round(p.rating||0))}</span> ${p.rating||0}</td>
+    <td><span class="bs ${p.isActive===true||p.isActive==='true'?'bs-active':'bs-inactive'}">${p.isActive===true||p.isActive==='true'?'Faol':'Nofaol'}</span></td>
+    <td><button class="btn btn-sm btn-outline" onclick="editProd('${p.id}')"><i class="fas fa-edit"></i></button>
+    <button class="btn btn-sm btn-danger" onclick="delProd('${p.id}')"><i class="fas fa-trash"></i></button></td></tr>`).join('')||'<tr><td colspan="8"><div class="empty"><p>Mahsulotlar yo\'q</p></div></td></tr>';
 }
+function filterProds(){const q=document.getElementById('prod-search').value.toLowerCase();renderProds(products.filter(p=>(p.name||'').toLowerCase().includes(q)||(p.category||'').toLowerCase().includes(q)))}
+function openProdModal(){document.getElementById('pm-title').textContent="Mahsulot qo'shish";document.getElementById('pm-id').value='';['pm-name','pm-price','pm-old','pm-img','pm-desc'].forEach(id=>document.getElementById(id).value='');document.getElementById('pm-stock').value='0';document.getElementById('pm-img-prev').style.display='none';updCatDD();om('m-prod')}
+function updCatDD(){document.getElementById('pm-cat').innerHTML=categories.map(c=>`<option value="${c.name}">${c.icon||''} ${c.name}</option>`).join('')||'<option>Kategoriya yo\'q</option>'}
+function editProd(id){const p=products.find(x=>x.id===id);if(!p)return;document.getElementById('pm-title').textContent='Tahrirlash';document.getElementById('pm-id').value=p.id;document.getElementById('pm-name').value=p.name||'';document.getElementById('pm-price').value=p.price||'';document.getElementById('pm-old').value=p.oldPrice||'';document.getElementById('pm-stock').value=p.stock||0;document.getElementById('pm-img').value=p.image||'';document.getElementById('pm-desc').value=p.description||'';
+  if(p.image){document.getElementById('pm-img-prev').src=p.image;document.getElementById('pm-img-prev').style.display='block'}else document.getElementById('pm-img-prev').style.display='none';
+  updCatDD();document.getElementById('pm-cat').value=p.category||'';om('m-prod')}
+async function saveProd(){const id=document.getElementById('pm-id').value;const d={name:document.getElementById('pm-name').value.trim(),category:document.getElementById('pm-cat').value,price:Number(document.getElementById('pm-price').value),oldPrice:Number(document.getElementById('pm-old').value)||'',stock:Number(document.getElementById('pm-stock').value),image:document.getElementById('pm-img').value.trim(),description:document.getElementById('pm-desc').value.trim()};
+  if(!d.name){toast('Nom kiriting');return}if(id){d.id=id;await api('updateProduct',d)}else await api('addProduct',d);toast('Saqlandi! ✅');cm('m-prod');loadProds()}
+async function delProd(id){if(!confirm("O'chirilsinmi?"))return;await api('deleteProduct',{id});toast("O'chirildi");loadProds()}
+async function uploadPImg(inp){if(!inp.files[0])return;const r=new FileReader();r.onload=async function(e){document.getElementById('pm-img-prev').src=e.target.result;document.getElementById('pm-img-prev').style.display='block';const b=e.target.result.split(',')[1];const res=await api('uploadImage',{imageData:b});if(res.success&&res.data){document.getElementById('pm-img').value=res.data.url;toast('Rasm yuklandi! ✅')}};r.readAsDataURL(inp.files[0])}
 
-// ============ ACTIVITY LOG ============
-async function loadActivity(){
-  const r=await apiCall('getActivityLog',{});
-  const el=document.getElementById('activity-list');
-  if(!r.success||!r.data.length){el.innerHTML='<div class="empty-state"><i class="fas fa-history"></i><h3>Journal bo\'sh</h3></div>';return}
-  el.innerHTML=r.data.map(l=>`<div class="log-item">
-    <div class="log-icon" style="background:rgba(108,99,255,0.1);color:var(--primary)"><i class="fas fa-bolt"></i></div>
-    <div><strong>${l.action}</strong> - ${l.details||''}<div class="log-time">${new Date(l.createdAt).toLocaleString()} · ${l.userId||'Tizim'}</div></div>
-  </div>`).join('');
-}
+// ===== CATEGORIES =====
+async function loadCats(){const r=await api('getCategories');if(!r.success)return;categories=r.data||[];
+  document.getElementById('cat-tbl').innerHTML=categories.map(c=>`<tr><td style="font-size:22px">${c.icon||'📦'}</td><td><strong>${c.name}</strong></td><td><span class="bs ${c.isActive===true||c.isActive==='true'?'bs-active':'bs-inactive'}">${c.isActive===true||c.isActive==='true'?'Faol':'Nofaol'}</span></td><td>${c.order||0}</td>
+  <td><button class="btn btn-sm btn-outline" onclick="editCat('${c.id}')"><i class="fas fa-edit"></i></button><button class="btn btn-sm btn-danger" onclick="delCat('${c.id}')"><i class="fas fa-trash"></i></button></td></tr>`).join('')||'<tr><td colspan="5"><div class="empty"><p>Yo\'q</p></div></td></tr>'}
+function openCatModal(){document.getElementById('cm-id').value='';['cm-name','cm-icon','cm-img'].forEach(id=>document.getElementById(id).value='');document.getElementById('cm-order').value='0';document.getElementById('cm-title').textContent="Qo'shish";om('m-cat')}
+function editCat(id){const c=categories.find(x=>x.id===id);if(!c)return;document.getElementById('cm-title').textContent='Tahrirlash';document.getElementById('cm-id').value=c.id;document.getElementById('cm-name').value=c.name||'';document.getElementById('cm-icon').value=c.icon||'';document.getElementById('cm-img').value=c.image||'';document.getElementById('cm-order').value=c.order||0;om('m-cat')}
+async function saveCat(){const id=document.getElementById('cm-id').value;const d={name:document.getElementById('cm-name').value.trim(),icon:document.getElementById('cm-icon').value.trim(),image:document.getElementById('cm-img').value.trim(),order:Number(document.getElementById('cm-order').value)};
+  if(!d.name){toast('Nom kiriting');return}if(id){d.id=id;await api('updateCategory',d)}else await api('addCategory',d);toast('Saqlandi!');cm('m-cat');loadCats()}
+async function delCat(id){if(!confirm("O'chirilsinmi?"))return;await api('deleteCategory',{id});toast("O'chirildi");loadCats()}
 
-// ============ START ============
+// ===== ORDERS =====
+async function loadOrders(){const st=document.getElementById('ord-filter').value;const r=await api('getOrders',{status:st});if(!r.success)return;orders=r.data||[];
+  const sm={pending:'Kutilmoqda',confirmed:'Tasdiqlandi',shipping:'Yetkazilmoqda',delivered:'Yetkazildi',cancelled:'Bekor'};
+  const sc={pending:'bs-pending',confirmed:'bs-confirmed',shipping:'bs-shipping',delivered:'bs-delivered',cancelled:'bs-cancelled'};
+  document.getElementById('ord-tbl').innerHTML=orders.map(o=>{let items=[];try{items=typeof o.items==='string'?JSON.parse(o.items):o.items}catch(e){}
+    const itemsStr=Array.isArray(items)?items.map(i=>(i.name||'')+' x'+(i.qty||i.quantity||1)).join(', '):'...';
+    return `<tr><td><strong>#${(o.id||'').slice(-6)}</strong></td><td>${o.userName||'Mijoz'}</td>
+    <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${itemsStr}</td>
+    <td><strong>${fp(o.total)}</strong></td><td>${o.deliveryType==='pickup'?'🏪 Olib ketish':'🚚 Yetkazish'}</td>
+    <td><span class="bs ${sc[o.status]||''}">${sm[o.status]||o.status}</span></td>
+    <td>${o.createdAt?new Date(o.createdAt).toLocaleDateString():''}</td>
+    <td><button class="btn btn-sm btn-outline" onclick="viewOrd('${o.id}')"><i class="fas fa-eye"></i></button>
+    <select class="btn btn-sm btn-outline" onchange="chgOrdSt('${o.id}',this.value)" style="padding:3px 6px;font-size:10px"><option value="">Holat</option><option value="confirmed">Tasdiqlash</option><option value="shipping">Yetkazish</option><option value="delivered">Yetkazildi</option><option value="cancelled">Bekor</option></select>
+    <button class="btn btn-sm btn-danger" onclick="delOrd('${o.id}')"><i class="fas fa-trash"></i></button></td></tr>`}).join('')||'<tr><td colspan="8"><div class="empty"><p>Yo\'q</p></div></td></tr>'}
+function viewOrd(id){const o=orders.find(x=>x.id===id);if(!o)return;let items=[];try{items=typeof o.items==='string'?JSON.parse(o.items):o.items}catch(e){}
+  document.getElementById('ord-detail').innerHTML=`<p><strong>ID:</strong> #${(o.id||'').slice(-6)}</p><p><strong>Mijoz:</strong> ${o.userName||''}</p><p><strong>Telefon:</strong> ${o.phone||'-'}</p><p><strong>Manzil:</strong> ${o.address||'-'}</p><p><strong>Tur:</strong> ${o.deliveryType==='pickup'?"O'zi olib ketish":"Yetkazib berish"}</p><p><strong>Izoh:</strong> ${o.note||'-'}</p><p><strong>Promokod:</strong> ${o.promoCode||'-'}</p>
+  <hr style="margin:10px 0;border-color:var(--border)"><h4>Mahsulotlar:</h4>
+  ${Array.isArray(items)?items.map(i=>`<div style="display:flex;justify-content:space-between;padding:5px 0;font-size:13px"><span>${i.name||''} x${i.qty||i.quantity||1}</span><span>${fp(i.total||0)}</span></div>`).join(''):'<p>Mahsulotlar ko\'rsatilmayapti</p>'}
+  <hr style="margin:10px 0;border-color:var(--border)"><div style="display:flex;justify-content:space-between;font-weight:800;font-size:16px;color:var(--primary)"><span>Jami:</span><span>${fp(o.total)}</span></div>
+  <p style="margin-top:10px;font-size:12px;color:var(--text2)">📅 ${o.createdAt?new Date(o.createdAt).toLocaleString():''}</p>`;
+  om('m-ord')}
+async function chgOrdSt(id,st){if(!st)return;await api('updateOrderStatus',{id,status:st});toast('Holat o\'zgartirildi!');loadOrders()}
+async function delOrd(id){if(!confirm("O'chirilsinmi?"))return;await api('deleteOrder',{id});toast("O'chirildi");loadOrders()}
+
+// ===== USERS =====
+async function loadUsers(){const r=await api('getUsers');if(!r.success)return;users=r.data||[];
+  document.getElementById('usr-tbl').innerHTML=users.map(u=>`<tr>
+  <td><img class="tbl-img" src="${u.avatar||'https://ui-avatars.com/api/?name='+encodeURIComponent(u.name||'U')+'&background=6C63FF&color=fff'}" onerror="this.src='https://ui-avatars.com/api/?name=U&background=6C63FF&color=fff'"></td>
+  <td><strong>${u.name||'-'}</strong></td><td>${u.username?'@'+u.username:'-'}</td><td>${u.phone||'-'}</td><td>${u.address||'-'}</td>
+  <td>${u.createdAt?new Date(u.createdAt).toLocaleDateString():'-'}</td>
+  <td><span class="bs ${u.isActive===true||u.isActive==='true'?'bs-active':'bs-inactive'}">${u.isActive===true||u.isActive==='true'?'Faol':'Bloklangan'}</span></td>
+  <td><button class="btn btn-sm ${u.isActive===true||u.isActive==='true'?'btn-danger':'btn-success'}" onclick="togUser('${u.id}')">${u.isActive===true||u.isActive==='true'?'Bloklash':'Ochish'}</button></td></tr>`).join('')||'<tr><td colspan="8"><div class="empty"><p>Yo\'q</p></div></td></tr>'}
+async function togUser(id){await api('toggleUserStatus',{id});toast('Holat o\'zgartirildi');loadUsers()}
+
+// ===== PROMOS =====
+async function loadPromos(){const r=await api('getPromoCodes');if(!r.success)return;promos=r.data||[];
+  document.getElementById('promo-tbl').innerHTML=promos.map(p=>`<tr><td><strong>${p.code}</strong></td><td>${p.discount}${p.type==='percent'?'%':' so\'m'}</td><td>${p.type==='percent'?'Foiz':'Qat\'iy'}</td>
+  <td>${p.usedCount||0}</td><td>${p.maxUses||'-'}</td><td><span class="bs ${p.isActive===true||p.isActive==='true'?'bs-active':'bs-inactive'}">${p.isActive===true||p.isActive==='true'?'Faol':'Nofaol'}</span></td>
+  <td><button class="btn btn-sm btn-danger" onclick="delPromo('${p.id}')"><i class="fas fa-trash"></i></button></td></tr>`).join('')||'<tr><td colspan="7"><div class="empty"><p>Yo\'q</p></div></td></tr>'}
+function openPromoModal(){['prom-code','prom-exp'].forEach(id=>document.getElementById(id).value='');document.getElementById('prom-disc').value='10';document.getElementById('prom-max').value='100';om('m-promo')}
+async function savePromo(){const d={code:document.getElementById('prom-code').value.trim(),discount:Number(document.getElementById('prom-disc').value),type:document.getElementById('prom-type').value,maxUses:Number(document.getElementById('prom-max').value),expiresAt:document.getElementById('prom-exp').value};
+  if(!d.code){toast('Kod kiriting');return}await api('addPromoCode',d);toast('Saqlandi!');cm('m-promo');loadPromos()}
+async function delPromo(id){if(!confirm("O'chirilsinmi?"))return;await api('deletePromoCode',{id});toast("O'chirildi");loadPromos()}
+
+// ===== REVIEWS =====
+async function loadRevs(){const r=await api('getReviews',{});if(!r.success)return;reviews=r.data||[];
+  if(!products.length){const p=await api('getProducts');if(p.success)products=p.data||[]}
+  document.getElementById('rev-tbl').innerHTML=reviews.map(rv=>{const pr=products.find(p=>p.id===rv.productId);
+    return `<tr><td><strong>${rv.userName||'-'}</strong></td><td>${pr?pr.name:(rv.productId||'-')}</td><td><span class="stars">${'★'.repeat(rv.rating||0)}${'☆'.repeat(5-(rv.rating||0))}</span></td>
+    <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${rv.comment||'-'}</td><td>${rv.createdAt?new Date(rv.createdAt).toLocaleDateString():''}</td>
+    <td><span class="bs ${rv.isApproved===true||rv.isApproved==='true'?'bs-active':'bs-pending'}">${rv.isApproved===true||rv.isApproved==='true'?'Tasdiqlangan':'Kutilmoqda'}</span></td>
+    <td>${!(rv.isApproved===true||rv.isApproved==='true')?`<button class="btn btn-sm btn-success" onclick="apRev('${rv.id}')"><i class="fas fa-check"></i></button>`:''} <button class="btn btn-sm btn-danger" onclick="delRev('${rv.id}')"><i class="fas fa-trash"></i></button></td></tr>`}).join('')||'<tr><td colspan="7"><div class="empty"><p>Yo\'q</p></div></td></tr>'}
+async function apRev(id){await api('approveReview',{id});toast('Tasdiqlandi');loadRevs()}
+async function delRev(id){if(!confirm("O'chirilsinmi?"))return;await api('deleteReview',{id});toast("O'chirildi");loadRevs()}
+
+// ===== BANNERS =====
+async function loadBans(){const r=await api('getBanners');if(!r.success)return;banners=r.data||[];
+  document.getElementById('ban-tbl').innerHTML=banners.map(b=>`<tr><td><img class="tbl-img" src="${img(b.image)}" style="width:70px;height:40px" onerror="this.src='https://via.placeholder.com/70x40/6C63FF/fff?text=B'"></td><td>${b.link||'-'}</td><td>${b.productId||'-'}</td>
+  <td><span class="bs ${b.isActive===true||b.isActive==='true'?'bs-active':'bs-inactive'}">${b.isActive===true||b.isActive==='true'?'Faol':'Nofaol'}</span></td>
+  <td><button class="btn btn-sm btn-outline" onclick="editBan('${b.id}')"><i class="fas fa-edit"></i></button><button class="btn btn-sm btn-danger" onclick="delBan('${b.id}')"><i class="fas fa-trash"></i></button></td></tr>`).join('')||'<tr><td colspan="5"><div class="empty"><p>Yo\'q</p></div></td></tr>'}
+function openBanModal(){document.getElementById('bm-id').value='';['bm-img','bm-link','bm-prod'].forEach(id=>document.getElementById(id).value='');document.getElementById('bm-order').value='0';document.getElementById('bm-img-prev').style.display='none';om('m-ban')}
+function editBan(id){const b=banners.find(x=>x.id===id);if(!b)return;document.getElementById('bm-id').value=b.id;document.getElementById('bm-img').value=b.image||'';document.getElementById('bm-link').value=b.link||'';document.getElementById('bm-prod').value=b.productId||'';document.getElementById('bm-order').value=b.order||0;
+  if(b.image){document.getElementById('bm-img-prev').src=b.image;document.getElementById('bm-img-prev').style.display='block'}om('m-ban')}
+async function saveBan(){const id=document.getElementById('bm-id').value;const d={image:document.getElementById('bm-img').value.trim(),link:document.getElementById('bm-link').value.trim(),productId:document.getElementById('bm-prod').value.trim(),order:Number(document.getElementById('bm-order').value)};
+  if(id){d.id=id;await api('updateBanner',d)}else await api('addBanner',d);toast('Saqlandi!');cm('m-ban');loadBans()}
+async function delBan(id){if(!confirm("O'chirilsinmi?"))return;await api('deleteBanner',{id});toast("O'chirildi");loadBans()}
+async function uploadBImg(inp){if(!inp.files[0])return;const r=new FileReader();r.onload=async function(e){document.getElementById('bm-img-prev').src=e.target.result;document.getElementById('bm-img-prev').style.display='block';const b=e.target.result.split(',')[1];const res=await api('uploadImage',{imageData:b});if(res.success&&res.data){document.getElementById('bm-img').value=res.data.url;toast('Rasm yuklandi!')}};r.readAsDataURL(inp.files[0])}
+
+// ===== NOTIFICATIONS =====
+async function loadNotifs(){const r=await api('getNotifications',{});if(!r.success)return;
+  document.getElementById('notif-tbl').innerHTML=(r.data||[]).map(n=>`<tr><td><strong>${n.title}</strong></td><td>${n.message}</td><td>${n.userId==='all'?'Barchasi':n.userId}</td><td>${n.createdAt?new Date(n.createdAt).toLocaleString():''}</td></tr>`).join('')||'<tr><td colspan="4"><div class="empty"><p>Yo\'q</p></div></td></tr>';
+  const u=await api('getUsers');if(u.success&&u.data){document.getElementById('nm-target').innerHTML='<option value="all">Barchasi</option>'+u.data.map(x=>`<option value="${x.id}">${x.name}</option>`).join('')}}
+function openNotifModal(){document.getElementById('nm-title').value='';document.getElementById('nm-msg').value='';om('m-notif')}
+async function sendNotif(){const t=document.getElementById('nm-title').value.trim(),m=document.getElementById('nm-msg').value.trim(),u=document.getElementById('nm-target').value;
+  if(!t||!m){toast('Sarlavha va xabar kiriting');return}await api('sendNotification',{title:t,message:m,userId:u});toast('Yuborildi!');cm('m-notif');loadNotifs()}
+
+// ===== SUPPORT =====
+async function loadSupUsers(){const r=await api('getUsers');if(!r.success)return;const sel=document.getElementById('sup-user');
+  sel.innerHTML='<option value="">Foydalanuvchi tanlang</option>'+(r.data||[]).map(u=>`<option value="${u.id}">${u.name||'User'} ${u.username?'(@'+u.username+')':''}</option>`).join('')}
+async function loadSupChat(){const uid=document.getElementById('sup-user').value;if(!uid){return}
+  const r=await api('getSupportMessages',{userId:uid});const msgs=r.success&&r.data?r.data:[];
+  document.getElementById('sup-chat-area').innerHTML=`<div class="chat-box"><div class="chat-msgs" id="sup-msgs">
+    ${msgs.length?msgs.map(m=>`<div class="chat-msg ${m.isAdmin===true||m.isAdmin==='true'?'admin':'user'}"><div class="bubble">${m.message}</div><div class="meta">${m.isAdmin===true||m.isAdmin==='true'?'👨‍💼 Admin':'👤 '+(m.userName||'User')} · ${new Date(m.createdAt).toLocaleString()}</div></div>`).join(''):'<div class="empty"><p>Xabarlar yo\'q</p></div>'}
+    </div><div class="chat-input"><input id="sup-inp" placeholder="Javob yozing..." onkeypress="if(event.key==='Enter')sendSupReply('${uid}')"><button onclick="sendSupReply('${uid}')"><i class="fas fa-paper-plane"></i></button></div></div>`;
+  const box=document.getElementById('sup-msgs');if(box)box.scrollTop=box.scrollHeight}
+async function sendSupReply(uid){const inp=document.getElementById('sup-inp');const m=inp.value.trim();if(!m)return;inp.value='';await api('replySupport',{userId:uid,message:m});loadSupChat()}
+
+// ===== SETTINGS =====
+async function loadSettings(){const r=await api('getSettings');if(!r.success)return;const s=r.data||{};
+  document.getElementById('s-name').value=s.storeName||'Oila Market';document.getElementById('s-phone').value=s.phone||'';document.getElementById('s-del').value=s.deliveryPrice||10000;document.getElementById('s-cur').value=s.currency||"so'm";document.getElementById('s-bot').value=s.telegramBot||''}
+async function saveSettings(){const ss=[{key:'storeName',value:document.getElementById('s-name').value},{key:'phone',value:document.getElementById('s-phone').value},{key:'deliveryPrice',value:document.getElementById('s-del').value},{key:'currency',value:document.getElementById('s-cur').value},{key:'telegramBot',value:document.getElementById('s-bot').value}];
+  for(const s of ss)await api('updateSetting',s);toast('Saqlandi!')}
+
+// ===== ACTIVITY =====
+async function loadActivity(){const r=await api('getActivityLog',{});const el=document.getElementById('act-list');
+  if(!r.success||!r.data||!r.data.length){el.innerHTML='<div class="empty"><i class="fas fa-history"></i><h3>Journal bo\'sh</h3></div>';return}
+  el.innerHTML=r.data.map(l=>`<div class="log-item"><div class="log-icon" style="background:rgba(108,99,255,.1);color:var(--primary)"><i class="fas fa-bolt"></i></div><div><strong>${l.action}</strong> - ${l.details||''}<div class="log-time">${l.createdAt?new Date(l.createdAt).toLocaleString():''} · ${l.userId||'Tizim'}</div></div></div>`).join('')}
+
 init();
 </script>
 </body>
