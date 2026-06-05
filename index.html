@@ -241,7 +241,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);trans
 </nav>
 
 <script>
-const API='https://script.google.com/macros/s/AKfycbzP_L0d0bx_cvgJlMG_dzQnsWrokS8GT_6XXIeaZg-vRPCiuw_vL6dPc3NQX-BFHr3A/exec';
+const API='https://script.google.com/macros/s/AKfycbyOi5VG7LWC_XVi0eyIaqdOq8fWNKlhLGWSNtlbc3rukTTypS_EKyBLlBMM6A2p-uLh/exec';
 const BOT_USERNAME='QiziriqOilaMarketBot'; // Replace with your bot username
 let U=JSON.parse(localStorage.getItem('oila_user'))||null;
 let products=[],categories=[],cart=[],favs=[],bannerIdx=0,bannerTimer=null,selRating=5,appliedPromo=null,promoDiscount=0;
@@ -306,6 +306,7 @@ function showPage(p){
   document.getElementById('page-'+p).classList.add('active');
   const pages=['home','cart','orders','favorites','profile'];
   document.querySelectorAll('.nav-item').forEach((n,i)=>{n.classList.toggle('active',pages[i]===p)});
+  if(supTimer&&p!=='support'){clearInterval(supTimer);supTimer=null;}
   if(p==='cart')renderCart();
   if(p==='orders')loadOrders();
   if(p==='favorites')loadFavs();
@@ -396,7 +397,7 @@ async function openProd(id){
     <div class="modal-stats">
       <div class="modal-stat"><i class="fas fa-star"></i>${p.rating||0} baho</div>
       <div class="modal-stat"><i class="fas fa-shopping-bag"></i>${p.sold||0} sotilgan</div>
-      <div class="modal-stat"><i class="fas fa-box"></i>${p.stock||0} dona</div>
+      <div class="modal-stat"><i class="fas fa-box"></i>${p.stock||0} ${p.unit||'dona'}</div>
     </div>
     <p class="modal-desc">${p.description||"Mahsulot haqida ma'lumot yo'q"}</p>
     <button class="btn-primary" onclick="addCart('${p.id}');closeModal()"><i class="fas fa-cart-plus"></i> Savatga qo'shish</button>
@@ -558,56 +559,72 @@ function renderProfile(){
 function renderEdit(){
   const avUrl=U.avatar||`https://ui-avatars.com/api/?name=${encodeURIComponent(U.name||'U')}&background=6C63FF&color=fff&size=120`;
   document.getElementById('edit-content').innerHTML=`
-    <div style="text-align:center;margin-bottom:18px">
-      <img id="av-prev" src="${avUrl}" style="width:90px;height:90px;border-radius:50%;object-fit:cover;border:3px solid var(--primary)" onerror="this.src='https://ui-avatars.com/api/?name=User&background=6C63FF&color=fff'">
-      <div style="margin-top:8px"><label style="display:inline-block;padding:8px 14px;background:var(--primary);color:#fff;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600"><i class="fas fa-camera"></i> Rasm yuklash<input type="file" accept="image/*" style="display:none" onchange="uploadAv(this)"></label></div>
+    <div style="background:var(--card);border-radius:var(--radius);padding:16px;margin-bottom:18px;box-shadow:var(--shadow)">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:12px">
+        <img src="${avUrl}" style="width:60px;height:60px;border-radius:50%;object-fit:cover;border:3px solid var(--primary)" onerror="this.src='https://ui-avatars.com/api/?name=User&background=6C63FF&color=fff'">
+        <div><div style="font-size:15px;font-weight:700">${U.name||'User'}</div><div style="font-size:12px;color:var(--text2)">${U.username?'@'+U.username:''} · ID: ${U.telegramId||''}</div></div>
+      </div>
+      <div style="font-size:11px;color:var(--text2);background:var(--bg);padding:8px 12px;border-radius:8px"><i class="fab fa-telegram"></i> Telegram ma'lumotlari avtomatik yuklanadi va o'zgartirilmaydi</div>
     </div>
-    <div class="form-group"><label>Ism</label><input id="ed-name" value="${U.name||''}"></div>
-    <div class="form-group"><label>Username</label><input id="ed-user" value="${U.username||''}" placeholder="@username"></div>
-    <div class="form-group"><label>Telefon</label><input id="ed-phone" value="${U.phone||''}" placeholder="+998 XX XXX XX XX"></div>
-    <div class="form-group"><label>Manzil</label><input id="ed-addr" value="${U.address||''}" placeholder="Manzilingiz"></div>
+    <div class="form-group"><label><i class="fas fa-phone"></i> Telefon raqam</label><input id="ed-phone" value="${U.phone||''}" placeholder="+998 XX XXX XX XX"></div>
+    <div class="form-group"><label><i class="fas fa-map-marker-alt"></i> Manzil</label><input id="ed-addr" value="${U.address||''}" placeholder="Manzilingizni kiriting"></div>
     <button class="btn-primary" onclick="saveProf()"><i class="fas fa-save"></i> Saqlash</button>`;
 }
-async function uploadAv(inp){
-  if(!inp.files[0])return;
-  const reader=new FileReader();
-  reader.onload=async function(e){
-    document.getElementById('av-prev').src=e.target.result;
-    const b64=e.target.result.split(',')[1];
-    const r=await api('uploadImage',{imageData:b64});
-    if(r.success&&r.data){U.avatar=r.data.url;localStorage.setItem('oila_user',JSON.stringify(U));showToast('Rasm yuklandi! ✅')}
-    else showToast('Rasm yuklanmadi');
-  };reader.readAsDataURL(inp.files[0]);
-}
 async function saveProf(){
-  const name=document.getElementById('ed-name').value.trim();
-  const username=document.getElementById('ed-user').value.trim();
   const phone=document.getElementById('ed-phone').value.trim();
   const address=document.getElementById('ed-addr').value.trim();
-  if(!name){showToast('Ism kiriting');return}
-  await api('updateProfile',{id:U.id,telegramId:U.telegramId,name,username,phone,address,avatar:U.avatar});
-  U.name=name;U.username=username;U.phone=phone;U.address=address;
+  await api('updateProfile',{id:U.id,telegramId:U.telegramId,phone,address});
+  U.phone=phone;U.address=address;
   localStorage.setItem('oila_user',JSON.stringify(U));
   showToast('Profil saqlandi! ✅');showPage('profile');
 }
 
 // ===== SUPPORT CHAT =====
+let supTimer=null;
 async function loadSupport(){
+  if(supTimer){clearInterval(supTimer);supTimer=null;}
+  await refreshSup();
+  supTimer=setInterval(refreshSup,5000);
+}
+async function refreshSup(){
   const r=await api('getSupportMessages',{userId:U.id});
   const msgs=r.success&&r.data?r.data:[];
-  document.getElementById('support-content').innerHTML=`
-    <div class="chat-box"><div class="chat-msgs" id="chat-msgs">
-    ${msgs.length?msgs.map(m=>`<div class="chat-msg ${m.isAdmin===true||m.isAdmin==='true'?'received':'sent'}"><div class="bubble">${m.message}</div><div class="time">${new Date(m.createdAt).toLocaleString()}</div></div>`).join(''):'<div class="empty-state"><i class="fas fa-comments"></i><h3>Chat bo\'sh</h3><p>Savolingizni yozing</p></div>'}
-    </div>
-    <div class="chat-input"><input id="chat-inp" placeholder="Xabar yozing..." onkeypress="if(event.key==='Enter')sendChat()"><button onclick="sendChat()"><i class="fas fa-paper-plane"></i></button></div></div>`;
-  const box=document.getElementById('chat-msgs');if(box)box.scrollTop=box.scrollHeight;
+  const box=document.getElementById('chat-msgs');
+  if(!box){
+    document.getElementById('support-content').innerHTML=`
+      <div class="chat-box"><div class="chat-msgs" id="chat-msgs">
+      ${msgs.length?msgs.map(m=>`<div class="chat-msg ${m.isAdmin===true||m.isAdmin==='true'?'received':'sent'}"><div class="bubble">${m.image?'<img src="'+m.image+'" style="max-width:200px;border-radius:8px;display:block;margin-bottom:4px" onerror="this.style.display=\'none\'">':''}${m.message?'<span>'+m.message+'</span>':''}</div><div class="time">${new Date(m.createdAt).toLocaleString()}</div></div>`).join(''):'<div class="empty-state"><i class="fas fa-comments"></i><h3>Chat bo\'sh</h3><p>Savolingizni yozing</p></div>'}
+      </div>
+      <div class="chat-input">
+        <label style="width:40px;height:40px;border-radius:50%;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--primary);flex-shrink:0"><i class="fas fa-image"></i><input type="file" accept="image/*" style="display:none" onchange="sendSupImg(this)"></label>
+        <input id="chat-inp" placeholder="Xabar yozing..." onkeypress="if(event.key==='Enter')sendChat()"><button onclick="sendChat()"><i class="fas fa-paper-plane"></i></button>
+      </div></div>`;
+    const bx=document.getElementById('chat-msgs');if(bx)bx.scrollTop=bx.scrollHeight;
+  } else {
+    box.innerHTML=msgs.length?msgs.map(m=>`<div class="chat-msg ${m.isAdmin===true||m.isAdmin==='true'?'received':'sent'}"><div class="bubble">${m.image?'<img src="'+m.image+'" style="max-width:200px;border-radius:8px;display:block;margin-bottom:4px" onerror="this.style.display=\'none\'">':''}${m.message?'<span>'+m.message+'</span>':''}</div><div class="time">${new Date(m.createdAt).toLocaleString()}</div></div>`).join(''):'';
+    box.scrollTop=box.scrollHeight;
+  }
 }
 async function sendChat(){
   const inp=document.getElementById('chat-inp');
   const msg=inp.value.trim();if(!msg)return;
   inp.value='';
   await api('sendSupportMessage',{userId:U.id,userName:U.name,message:msg});
-  loadSupport();
+  refreshSup();
+}
+async function sendSupImg(inp){
+  if(!inp.files[0])return;
+  const reader=new FileReader();
+  reader.onload=async function(e){
+    const b64=e.target.result.split(',')[1];
+    showToast('Rasm yuklanmoqda...');
+    const r=await api('uploadImage',{imageData:b64});
+    if(r.success&&r.data){
+      await api('sendSupportMessage',{userId:U.id,userName:U.name,message:'📷 Rasm',image:r.data.url});
+      showToast('Rasm yuborildi! ✅');
+      refreshSup();
+    }else showToast('Rasm yuklanmadi');
+  };reader.readAsDataURL(inp.files[0]);
 }
 
 // ===== INVITE FRIENDS =====
