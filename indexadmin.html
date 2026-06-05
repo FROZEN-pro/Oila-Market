@@ -123,6 +123,7 @@ tr:hover{background:var(--bg)}
     </div>
   </nav>
   <div class="sb-footer">
+    <button class="nav-link" onclick="api('initSheets').then(r=>toast(r.success?'Sheets tiklandi!':'Xato'))"><i class="fas fa-tools"></i>Sheets tiklash</button>
     <button class="nav-link" onclick="toggleTheme()"><i class="fas fa-moon" id="theme-icon"></i>Qorong'u rejim</button>
     <button class="nav-link" onclick="window.open(location.href.replace('indexadmin.html',''),'_blank')"><i class="fas fa-external-link-alt"></i>User app</button>
   </div>
@@ -142,7 +143,7 @@ tr:hover{background:var(--bg)}
 <!-- PRODUCTS -->
 <div class="section" id="sec-products">
   <div class="pg-hdr"><h2>📦 Mahsulotlar</h2><div class="hdr-acts"><input class="search-inp" placeholder="Qidirish..." id="prod-search" oninput="filterProds()"><button class="btn btn-primary" onclick="openProdModal()"><i class="fas fa-plus"></i> Qo'shish</button></div></div>
-  <div class="tbl-wrap"><table><thead><tr><th>Rasm</th><th>Nomi</th><th>Kategoriya</th><th>Narx</th><th>Zaxira</th><th>Reyting</th><th>Holat</th><th>Amallar</th></tr></thead><tbody id="prod-tbl"></tbody></table></div>
+  <div class="tbl-wrap" style="overflow-x:auto"><table><thead><tr><th>Rasm</th><th>Nomi</th><th>Kategoriya</th><th>Narx</th><th>Birlik</th><th>Zaxira</th><th>Reyting</th><th>Holat</th><th>Amallar</th></tr></thead><tbody id="prod-tbl"></tbody></table></div>
 </div>
 
 <!-- CATEGORIES -->
@@ -154,13 +155,13 @@ tr:hover{background:var(--bg)}
 <!-- ORDERS -->
 <div class="section" id="sec-orders">
   <div class="pg-hdr"><h2>🛍️ Buyurtmalar</h2><div class="hdr-acts"><select class="search-inp" id="ord-filter" onchange="loadOrders()" style="width:auto"><option value="all">Barchasi</option><option value="pending">Kutilmoqda</option><option value="confirmed">Tasdiqlangan</option><option value="shipping">Yetkazilmoqda</option><option value="delivered">Yetkazilgan</option><option value="cancelled">Bekor</option></select></div></div>
-  <div class="tbl-wrap"><table><thead><tr><th>ID</th><th>Mijoz</th><th>Mahsulotlar</th><th>Summa</th><th>Tur</th><th>Holat</th><th>Sana</th><th>Amallar</th></tr></thead><tbody id="ord-tbl"></tbody></table></div>
+  <div class="tbl-wrap" style="overflow-x:auto"><table><thead><tr><th>ID</th><th>Mijoz</th><th>Mahsulotlar</th><th>Summa</th><th>Tur</th><th>Holat</th><th>Sana</th><th>Amallar</th></tr></thead><tbody id="ord-tbl"></tbody></table></div>
 </div>
 
 <!-- USERS -->
 <div class="section" id="sec-users">
   <div class="pg-hdr"><h2>👥 Foydalanuvchilar</h2></div>
-  <div class="tbl-wrap"><table><thead><tr><th>Rasm</th><th>Ism</th><th>Username</th><th>Telefon</th><th>Manzil</th><th>Sana</th><th>Holat</th><th>Amallar</th></tr></thead><tbody id="usr-tbl"></tbody></table></div>
+  <div class="tbl-wrap" style="overflow-x:auto"><table><thead><tr><th>Rasm</th><th>Ism</th><th>Username</th><th>Telegram ID</th><th>Telefon</th><th>Manzil</th><th>Sana</th><th>Holat</th><th>Amallar</th></tr></thead><tbody id="usr-tbl"></tbody></table></div>
 </div>
 
 <!-- PROMOS -->
@@ -221,9 +222,11 @@ tr:hover{background:var(--bg)}
   <div class="form-group"><label>Nomi</label><input id="pm-name"></div>
   <div class="form-row"><div class="form-group"><label>Kategoriya</label><select id="pm-cat"></select></div><div class="form-group"><label>Zaxira</label><input id="pm-stock" type="number" value="0"></div></div>
   <div class="form-row"><div class="form-group"><label>Narx</label><input id="pm-price" type="number"></div><div class="form-group"><label>Eski narx</label><input id="pm-old" type="number"></div></div>
-  <div class="form-group"><label>Rasm URL</label><input id="pm-img"><img id="pm-img-prev" class="img-preview" style="display:none"></div>
+  <div class="form-row"><div class="form-group"><label>O'lchov birligi</label><select id="pm-unit"><option value="dona">dona</option><option value="kg">kg</option><option value="litr">litr</option><option value="metr">metr</option><option value="quti">quti</option><option value="upak">upak</option></select></div><div class="form-group"><label>Holat</label><select id="pm-active"><option value="true">Faol</option><option value="false">Nofaol</option></select></div></div>
+  <div class="form-group"><label>Asosiy rasm URL</label><input id="pm-img" oninput="updImgPrev()"><img id="pm-img-prev" class="img-preview" style="display:none"></div>
+  <div class="form-group"><label>Qo'shimcha rasmlar</label><div id="pm-imgs" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px"></div><div style="display:flex;gap:6px"><input id="pm-img-add" placeholder="Rasm URL" style="flex:1;padding:8px;border:1px solid var(--border);border-radius:8px;font-size:12px;background:var(--bg);color:var(--text)"><button class="btn btn-sm btn-outline" onclick="addImg()" style="white-space:nowrap"><i class="fas fa-plus"></i> Qo'shish</button></div></div>
   <div class="form-group"><label>Tavsif</label><textarea id="pm-desc" rows="3"></textarea></div>
-  <div style="display:flex;gap:8px"><button class="btn btn-primary" onclick="saveProd()"><i class="fas fa-save"></i> Saqlash</button><label class="btn btn-outline" style="cursor:pointer"><i class="fas fa-upload"></i> Yuklash<input type="file" accept="image/*" style="display:none" onchange="uploadPImg(this)"></label></div>
+  <div style="display:flex;gap:8px"><button class="btn btn-primary" onclick="saveProd()"><i class="fas fa-save"></i> Saqlash</button><label class="btn btn-outline" style="cursor:pointer"><i class="fas fa-upload"></i> Rasm yuklash<input type="file" accept="image/*" style="display:none" onchange="uploadPImg(this)"></label></div>
 </div></div>
 
 <!-- CATEGORY MODAL -->
@@ -266,8 +269,8 @@ tr:hover{background:var(--bg)}
 <div class="toast" id="toast"></div>
 
 <script>
-const API='https://script.google.com/macros/s/AKfycbzP_L0d0bx_cvgJlMG_dzQnsWrokS8GT_6XXIeaZg-vRPCiuw_vL6dPc3NQX-BFHr3A/exec';
-let products=[],categories=[],orders=[],users=[],reviews=[],banners=[],promos=[];
+const API='https://script.google.com/macros/s/AKfycbyOi5VG7LWC_XVi0eyIaqdOq8fWNKlhLGWSNtlbc3rukTTypS_EKyBLlBMM6A2p-uLh/exec';
+let products=[],categories=[],orders=[],users=[],reviews=[],banners=[],promos=[],prodImgs=[];
 
 async function api(action,params={}){
   try{
@@ -293,6 +296,7 @@ function init(){
 function toggleTheme(){const d=document.documentElement.getAttribute('data-theme')==='dark';document.documentElement.setAttribute('data-theme',d?'':'dark');localStorage.setItem('admin_theme',d?'light':'dark');document.getElementById('theme-icon').className=d?'fas fa-moon':'fas fa-sun'}
 function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open')}
 function show(n,el){document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));document.getElementById('sec-'+n).classList.add('active');document.querySelectorAll('.nav-link').forEach(x=>x.classList.remove('active'));if(el)el.classList.add('active');document.getElementById('sidebar').classList.remove('open');
+  if(supTimer&&n!=='support'){clearInterval(supTimer);supTimer=null;}
   const loaders={dashboard:refreshDash,products:loadProds,categories:loadCats,orders:loadOrders,users:loadUsers,promos:loadPromos,reviews:loadRevs,banners:loadBans,notifications:loadNotifs,support:loadSupUsers,settings:loadSettings,activity:loadActivity};
   if(loaders[n])loaders[n]();
 }
@@ -333,19 +337,25 @@ function renderProds(ps){
   document.getElementById('prod-tbl').innerHTML=ps.map(p=>`<tr>
     <td><img class="tbl-img" src="${img(p.image)}" onerror="this.src='https://via.placeholder.com/40/6C63FF/fff?text=OM'"></td>
     <td><strong>${p.name}</strong></td><td>${p.category||'-'}</td><td>${fp(p.price)}</td>
+    <td>${p.unit||'dona'}</td>
     <td><span class="bs ${Number(p.stock)<5?'bs-cancelled':'bs-active'}">${p.stock||0}</span></td>
     <td><span class="stars">${'★'.repeat(Math.round(p.rating||0))}</span> ${p.rating||0}</td>
     <td><span class="bs ${p.isActive===true||p.isActive==='true'?'bs-active':'bs-inactive'}">${p.isActive===true||p.isActive==='true'?'Faol':'Nofaol'}</span></td>
     <td><button class="btn btn-sm btn-outline" onclick="editProd('${p.id}')"><i class="fas fa-edit"></i></button>
-    <button class="btn btn-sm btn-danger" onclick="delProd('${p.id}')"><i class="fas fa-trash"></i></button></td></tr>`).join('')||'<tr><td colspan="8"><div class="empty"><p>Mahsulotlar yo\'q</p></div></td></tr>';
+    <button class="btn btn-sm btn-danger" onclick="delProd('${p.id}')"><i class="fas fa-trash"></i></button></td></tr>`).join('')||'<tr><td colspan="9"><div class="empty"><p>Mahsulotlar yo\'q</p></div></td></tr>';
 }
 function filterProds(){const q=document.getElementById('prod-search').value.toLowerCase();renderProds(products.filter(p=>(p.name||'').toLowerCase().includes(q)||(p.category||'').toLowerCase().includes(q)))}
-function openProdModal(){document.getElementById('pm-title').textContent="Mahsulot qo'shish";document.getElementById('pm-id').value='';['pm-name','pm-price','pm-old','pm-img','pm-desc'].forEach(id=>document.getElementById(id).value='');document.getElementById('pm-stock').value='0';document.getElementById('pm-img-prev').style.display='none';updCatDD();om('m-prod')}
+function openProdModal(){document.getElementById('pm-title').textContent="Mahsulot qo'shish";document.getElementById('pm-id').value='';['pm-name','pm-price','pm-old','pm-img','pm-desc'].forEach(id=>document.getElementById(id).value='');document.getElementById('pm-stock').value='0';document.getElementById('pm-img-prev').style.display='none';document.getElementById('pm-unit').value='dona';document.getElementById('pm-active').value='true';prodImgs=[];renderImgThumbs();updCatDD();om('m-prod')}
 function updCatDD(){document.getElementById('pm-cat').innerHTML=categories.map(c=>`<option value="${c.name}">${c.icon||''} ${c.name}</option>`).join('')||'<option>Kategoriya yo\'q</option>'}
-function editProd(id){const p=products.find(x=>x.id===id);if(!p)return;document.getElementById('pm-title').textContent='Tahrirlash';document.getElementById('pm-id').value=p.id;document.getElementById('pm-name').value=p.name||'';document.getElementById('pm-price').value=p.price||'';document.getElementById('pm-old').value=p.oldPrice||'';document.getElementById('pm-stock').value=p.stock||0;document.getElementById('pm-img').value=p.image||'';document.getElementById('pm-desc').value=p.description||'';
+function updImgPrev(){const v=document.getElementById('pm-img').value;const prev=document.getElementById('pm-img-prev');if(v){prev.src=v;prev.style.display='block'}else prev.style.display='none'}
+function addImg(){const v=document.getElementById('pm-img-add').value.trim();if(!v)return;prodImgs.push(v);document.getElementById('pm-img-add').value='';renderImgThumbs()}
+function rmImg(i){prodImgs.splice(i,1);renderImgThumbs()}
+function renderImgThumbs(){document.getElementById('pm-imgs').innerHTML=prodImgs.map((u,i)=>`<div style="position:relative;display:inline-block"><img src="${u}" style="width:50px;height:50px;border-radius:6px;object-fit:cover" onerror="this.parentElement.style.display='none'"><button onclick="rmImg(${i})" style="position:absolute;top:-4px;right:-4px;width:18px;height:18px;border-radius:50%;background:var(--danger);color:#fff;border:none;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center">&times;</button></div>`).join('')}
+function editProd(id){const p=products.find(x=>x.id===id);if(!p)return;document.getElementById('pm-title').textContent='Tahrirlash';document.getElementById('pm-id').value=p.id;document.getElementById('pm-name').value=p.name||'';document.getElementById('pm-price').value=p.price||'';document.getElementById('pm-old').value=p.oldPrice||'';document.getElementById('pm-stock').value=p.stock||0;document.getElementById('pm-img').value=p.image||'';document.getElementById('pm-desc').value=p.description||'';document.getElementById('pm-unit').value=p.unit||'dona';document.getElementById('pm-active').value=(p.isActive===true||p.isActive==='true')?'true':'false';
   if(p.image){document.getElementById('pm-img-prev').src=p.image;document.getElementById('pm-img-prev').style.display='block'}else document.getElementById('pm-img-prev').style.display='none';
-  updCatDD();document.getElementById('pm-cat').value=p.category||'';om('m-prod')}
-async function saveProd(){const id=document.getElementById('pm-id').value;const d={name:document.getElementById('pm-name').value.trim(),category:document.getElementById('pm-cat').value,price:Number(document.getElementById('pm-price').value),oldPrice:Number(document.getElementById('pm-old').value)||'',stock:Number(document.getElementById('pm-stock').value),image:document.getElementById('pm-img').value.trim(),description:document.getElementById('pm-desc').value.trim()};
+  try{prodImgs=typeof p.images==='string'?JSON.parse(p.images):(Array.isArray(p.images)?p.images:[])}catch(e){prodImgs=[]}
+  renderImgThumbs();updCatDD();document.getElementById('pm-cat').value=p.category||'';om('m-prod')}
+async function saveProd(){const id=document.getElementById('pm-id').value;const d={name:document.getElementById('pm-name').value.trim(),category:document.getElementById('pm-cat').value,price:Number(document.getElementById('pm-price').value),oldPrice:Number(document.getElementById('pm-old').value)||'',stock:Number(document.getElementById('pm-stock').value),image:document.getElementById('pm-img').value.trim(),images:JSON.stringify(prodImgs),description:document.getElementById('pm-desc').value.trim(),unit:document.getElementById('pm-unit').value,isActive:document.getElementById('pm-active').value==='true'};
   if(!d.name){toast('Nom kiriting');return}if(id){d.id=id;await api('updateProduct',d)}else await api('addProduct',d);toast('Saqlandi! ✅');cm('m-prod');loadProds()}
 async function delProd(id){if(!confirm("O'chirilsinmi?"))return;await api('deleteProduct',{id});toast("O'chirildi");loadProds()}
 async function uploadPImg(inp){if(!inp.files[0])return;const r=new FileReader();r.onload=async function(e){document.getElementById('pm-img-prev').src=e.target.result;document.getElementById('pm-img-prev').style.display='block';const b=e.target.result.split(',')[1];const res=await api('uploadImage',{imageData:b});if(res.success&&res.data){document.getElementById('pm-img').value=res.data.url;toast('Rasm yuklandi! ✅')}};r.readAsDataURL(inp.files[0])}
@@ -379,7 +389,10 @@ function viewOrd(id){const o=orders.find(x=>x.id===id);if(!o)return;let items=[]
   <hr style="margin:10px 0;border-color:var(--border)"><h4>Mahsulotlar:</h4>
   ${Array.isArray(items)?items.map(i=>`<div style="display:flex;justify-content:space-between;padding:5px 0;font-size:13px"><span>${i.name||''} x${i.qty||i.quantity||1}</span><span>${fp(i.total||0)}</span></div>`).join(''):'<p>Mahsulotlar ko\'rsatilmayapti</p>'}
   <hr style="margin:10px 0;border-color:var(--border)"><div style="display:flex;justify-content:space-between;font-weight:800;font-size:16px;color:var(--primary)"><span>Jami:</span><span>${fp(o.total)}</span></div>
-  <p style="margin-top:10px;font-size:12px;color:var(--text2)">📅 ${o.createdAt?new Date(o.createdAt).toLocaleString():''}</p>`;
+  <p style="margin-top:10px;font-size:12px;color:var(--text2)">📅 Yaratilgan: ${o.createdAt?new Date(o.createdAt).toLocaleString():''}</p>
+  <p style="font-size:12px;color:var(--text2)">📅 Yangilangan: ${o.updatedAt?new Date(o.updatedAt).toLocaleString():'-'}</p>
+  ${o.deliveredAt?'<p style="font-size:12px;color:var(--accent);font-weight:600">✅ Yetkazilgan: '+new Date(o.deliveredAt).toLocaleString()+'</p>':''}
+  <select class="btn btn-primary" style="margin-top:10px;width:100%" onchange="chgOrdSt('${o.id}',this.value);cm('m-ord')"><option value="">Holatni o'zgartirish</option><option value="pending">Kutilmoqda</option><option value="confirmed">Tasdiqlash</option><option value="shipping">Yetkazish</option><option value="delivered">Yetkazildi</option><option value="cancelled">Bekor</option></select>`;
   om('m-ord')}
 async function chgOrdSt(id,st){if(!st)return;await api('updateOrderStatus',{id,status:st});toast('Holat o\'zgartirildi!');loadOrders()}
 async function delOrd(id){if(!confirm("O'chirilsinmi?"))return;await api('deleteOrder',{id});toast("O'chirildi");loadOrders()}
@@ -388,10 +401,10 @@ async function delOrd(id){if(!confirm("O'chirilsinmi?"))return;await api('delete
 async function loadUsers(){const r=await api('getUsers');if(!r.success)return;users=r.data||[];
   document.getElementById('usr-tbl').innerHTML=users.map(u=>`<tr>
   <td><img class="tbl-img" src="${u.avatar||'https://ui-avatars.com/api/?name='+encodeURIComponent(u.name||'U')+'&background=6C63FF&color=fff'}" onerror="this.src='https://ui-avatars.com/api/?name=U&background=6C63FF&color=fff'"></td>
-  <td><strong>${u.name||'-'}</strong></td><td>${u.username?'@'+u.username:'-'}</td><td>${u.phone||'-'}</td><td>${u.address||'-'}</td>
+  <td><strong>${u.name||'-'}</strong></td><td>${u.username?'@'+u.username:'-'}</td><td style="font-size:11px;font-family:monospace">${u.telegramId||'-'}</td><td>${u.phone||'-'}</td><td>${u.address||'-'}</td>
   <td>${u.createdAt?new Date(u.createdAt).toLocaleDateString():'-'}</td>
   <td><span class="bs ${u.isActive===true||u.isActive==='true'?'bs-active':'bs-inactive'}">${u.isActive===true||u.isActive==='true'?'Faol':'Bloklangan'}</span></td>
-  <td><button class="btn btn-sm ${u.isActive===true||u.isActive==='true'?'btn-danger':'btn-success'}" onclick="togUser('${u.id}')">${u.isActive===true||u.isActive==='true'?'Bloklash':'Ochish'}</button></td></tr>`).join('')||'<tr><td colspan="8"><div class="empty"><p>Yo\'q</p></div></td></tr>'}
+  <td><button class="btn btn-sm ${u.isActive===true||u.isActive==='true'?'btn-danger':'btn-success'}" onclick="togUser('${u.id}')">${u.isActive===true||u.isActive==='true'?'Bloklash':'Ochish'}</button></td></tr>`).join('')||'<tr><td colspan="9"><div class="empty"><p>Yo\'q</p></div></td></tr>'}
 async function togUser(id){await api('toggleUserStatus',{id});toast('Holat o\'zgartirildi');loadUsers()}
 
 // ===== PROMOS =====
@@ -437,15 +450,46 @@ async function sendNotif(){const t=document.getElementById('nm-title').value.tri
   if(!t||!m){toast('Sarlavha va xabar kiriting');return}await api('sendNotification',{title:t,message:m,userId:u});toast('Yuborildi!');cm('m-notif');loadNotifs()}
 
 // ===== SUPPORT =====
+let supTimer=null;
 async function loadSupUsers(){const r=await api('getUsers');if(!r.success)return;const sel=document.getElementById('sup-user');
   sel.innerHTML='<option value="">Foydalanuvchi tanlang</option>'+(r.data||[]).map(u=>`<option value="${u.id}">${u.name||'User'} ${u.username?'(@'+u.username+')':''}</option>`).join('')}
-async function loadSupChat(){const uid=document.getElementById('sup-user').value;if(!uid){return}
+async function loadSupChat(){
+  if(supTimer){clearInterval(supTimer);supTimer=null;}
+  const uid=document.getElementById('sup-user').value;if(!uid)return;
+  await refreshSupChat(uid);
+  supTimer=setInterval(()=>refreshSupChat(uid),5000);
+}
+async function refreshSupChat(uid){
+  if(!uid)uid=document.getElementById('sup-user').value;if(!uid)return;
   const r=await api('getSupportMessages',{userId:uid});const msgs=r.success&&r.data?r.data:[];
-  document.getElementById('sup-chat-area').innerHTML=`<div class="chat-box"><div class="chat-msgs" id="sup-msgs">
-    ${msgs.length?msgs.map(m=>`<div class="chat-msg ${m.isAdmin===true||m.isAdmin==='true'?'admin':'user'}"><div class="bubble">${m.message}</div><div class="meta">${m.isAdmin===true||m.isAdmin==='true'?'👨‍💼 Admin':'👤 '+(m.userName||'User')} · ${new Date(m.createdAt).toLocaleString()}</div></div>`).join(''):'<div class="empty"><p>Xabarlar yo\'q</p></div>'}
-    </div><div class="chat-input"><input id="sup-inp" placeholder="Javob yozing..." onkeypress="if(event.key==='Enter')sendSupReply('${uid}')"><button onclick="sendSupReply('${uid}')"><i class="fas fa-paper-plane"></i></button></div></div>`;
-  const box=document.getElementById('sup-msgs');if(box)box.scrollTop=box.scrollHeight}
-async function sendSupReply(uid){const inp=document.getElementById('sup-inp');const m=inp.value.trim();if(!m)return;inp.value='';await api('replySupport',{userId:uid,message:m});loadSupChat()}
+  const box=document.getElementById('sup-msgs');
+  if(!box){
+    document.getElementById('sup-chat-area').innerHTML=`<div class="chat-box"><div class="chat-msgs" id="sup-msgs">
+      ${msgs.length?msgs.map(m=>`<div class="chat-msg ${m.isAdmin===true||m.isAdmin==='true'?'admin':'user'}"><div class="bubble">${m.image?'<img src="'+m.image+'" style="max-width:180px;border-radius:8px;display:block;margin-bottom:4px" onerror="this.style.display=\'none\'">':''}${m.message?'<span>'+m.message+'</span>':''}</div><div class="meta">${m.isAdmin===true||m.isAdmin==='true'?'👨‍💼 Admin':'👤 '+(m.userName||'User')} · ${new Date(m.createdAt).toLocaleString()}</div></div>`).join(''):'<div class="empty"><p>Xabarlar yo\'q</p></div>'}
+      </div><div class="chat-input">
+        <label style="width:36px;height:36px;border-radius:50%;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--primary);flex-shrink:0"><i class="fas fa-image"></i><input type="file" accept="image/*" style="display:none" onchange="sendSupImg('${uid}',this)"></label>
+        <input id="sup-inp" placeholder="Javob yozing..." onkeypress="if(event.key==='Enter')sendSupReply('${uid}')"><button onclick="sendSupReply('${uid}')"><i class="fas fa-paper-plane"></i></button></div></div>`;
+    const bx=document.getElementById('sup-msgs');if(bx)bx.scrollTop=bx.scrollHeight;
+  } else {
+    box.innerHTML=msgs.length?msgs.map(m=>`<div class="chat-msg ${m.isAdmin===true||m.isAdmin==='true'?'admin':'user'}"><div class="bubble">${m.image?'<img src="'+m.image+'" style="max-width:180px;border-radius:8px;display:block;margin-bottom:4px" onerror="this.style.display=\'none\'">':''}${m.message?'<span>'+m.message+'</span>':''}</div><div class="meta">${m.isAdmin===true||m.isAdmin==='true'?'👨‍💼 Admin':'👤 '+(m.userName||'User')} · ${new Date(m.createdAt).toLocaleString()}</div></div>`).join(''):'';
+    box.scrollTop=box.scrollHeight;
+  }
+}
+async function sendSupReply(uid){const inp=document.getElementById('sup-inp');const m=inp.value.trim();if(!m)return;inp.value='';await api('replySupport',{userId:uid,message:m});refreshSupChat(uid)}
+async function sendSupImg(uid,inp){
+  if(!inp.files[0])return;
+  const reader=new FileReader();
+  reader.onload=async function(e){
+    const b64=e.target.result.split(',')[1];
+    toast('Rasm yuklanmoqda...');
+    const r=await api('uploadImage',{imageData:b64});
+    if(r.success&&r.data){
+      await api('replySupport',{userId:uid,message:'📷 Rasm',image:r.data.url});
+      toast('Rasm yuborildi! ✅');
+      refreshSupChat(uid);
+    }else toast('Rasm yuklanmadi');
+  };reader.readAsDataURL(inp.files[0]);
+}
 
 // ===== SETTINGS =====
 async function loadSettings(){const r=await api('getSettings');if(!r.success)return;const s=r.data||{};
