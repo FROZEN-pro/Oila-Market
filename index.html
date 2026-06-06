@@ -23,8 +23,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);trans
 .search-bar{display:flex;align-items:center;background:var(--card);border-radius:var(--radius);padding:12px 16px;box-shadow:var(--shadow);margin-bottom:16px;gap:10px}
 .search-bar input{flex:1;border:none;outline:none;background:transparent;font-size:15px;color:var(--text);font-family:inherit}
 .search-bar i{color:var(--text2)}
-.banner-slider{position:relative;border-radius:var(--radius);overflow:hidden;margin-bottom:20px;height:170px;box-shadow:var(--shadow-lg)}
-.banner-slide{position:absolute;width:100%;height:100%;opacity:0;transition:opacity .8s;background-size:cover;background-position:center;display:flex;align-items:flex-end}
+.banner-slider{position:relative;border-radius:var(--radius);overflow:hidden;margin-bottom:20px;height:170px;box-shadow:var(--shadow-lg);touch-action:pan-y}
+.banner-slide{position:absolute;width:100%;height:100%;opacity:0;transition:opacity .8s;background-size:cover;background-position:center;display:flex;align-items:flex-end;cursor:pointer}
 .banner-slide.active{opacity:1}
 .banner-slide::after{content:'';position:absolute;bottom:0;left:0;right:0;height:60%;background:linear-gradient(transparent,rgba(0,0,0,.7))}
 .banner-content{position:relative;z-index:2;padding:18px;color:#fff;width:100%}
@@ -33,9 +33,9 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);trans
 .banner-dots{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:3}
 .banner-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.5);cursor:pointer;transition:var(--tr)}.banner-dot.active{background:#fff;width:20px;border-radius:4px}
 .cat-scroll{display:flex;gap:10px;overflow-x:auto;padding-bottom:8px;margin-bottom:18px;scrollbar-width:none}.cat-scroll::-webkit-scrollbar{display:none}
-.cat-chip{display:flex;flex-direction:column;align-items:center;gap:5px;min-width:68px;padding:10px 6px;background:var(--card);border-radius:var(--radius-sm);cursor:pointer;transition:var(--tr);box-shadow:var(--shadow);border:2px solid transparent}
+.cat-chip{display:flex;flex-direction:column;align-items:center;gap:5px;min-width:72px;max-width:90px;padding:10px 8px;background:var(--card);border-radius:var(--radius-sm);cursor:pointer;transition:var(--tr);box-shadow:var(--shadow);border:2px solid transparent;flex-shrink:0}
 .cat-chip.active{border-color:var(--primary);background:linear-gradient(135deg,rgba(108,99,255,.1),rgba(255,101,132,.05))}
-.cat-chip .icon{font-size:22px}.cat-chip span{font-size:11px;font-weight:600;white-space:nowrap}
+.cat-chip .icon{font-size:22px}.cat-chip span{font-size:10px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:70px;text-align:center}
 .sec-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
 .sec-title h2{font-size:19px;font-weight:700}
 .products-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:20px}
@@ -241,10 +241,10 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);trans
 </nav>
 
 <script>
-const API='https://script.google.com/macros/s/AKfycbyOi5VG7LWC_XVi0eyIaqdOq8fWNKlhLGWSNtlbc3rukTTypS_EKyBLlBMM6A2p-uLh/exec';
+const API='https://script.google.com/macros/s/AKfycbxUqXJGkkicx0GxHPDjzdlIiAIyX3QPx0SKfQj67y7d1Rnqen2vodooj_wqq5GQRytF/exec';
 const BOT_USERNAME='QiziriqOilaMarketBot'; // Replace with your bot username
 let U=JSON.parse(localStorage.getItem('oila_user'))||null;
-let products=[],categories=[],cart=[],favs=[],bannerIdx=0,bannerTimer=null,selRating=5,appliedPromo=null,promoDiscount=0;
+let products=[],categories=[],cart=[],favs=[],bannerIdx=0,bannerTimer=null,bannersData=[],selRating=5,appliedPromo=null,promoDiscount=0;
 
 // ===== TELEGRAM INTEGRATION =====
 function initTelegram(){
@@ -265,23 +265,13 @@ function initTelegram(){
   }
 }
 
-// ===== FAST API =====
+// ===== FAST API (POST for all - fixes image upload & chat) =====
 async function api(action,params={}){
   try{
-    const url=API+'?action='+encodeURIComponent(action)+'&'+new URLSearchParams(params).toString();
-    const r=await fetch(url);
+    const r=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action,...params})});
     if(!r.ok)throw new Error('HTTP '+r.status);
     return await r.json();
-  }catch(e){
-    try{
-      const r2=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action,...params})});
-      // no-cors fallback - can't read, so retry GET after brief delay
-      await new Promise(r=>setTimeout(r,300));
-      const url=API+'?action='+encodeURIComponent(action)+'&'+new URLSearchParams(params).toString();
-      const r3=await fetch(url);
-      return await r3.json();
-    }catch(e2){return{success:false,error:e2.message}}
-  }
+  }catch(e){return{success:false,error:e.message}}
 }
 
 // ===== INIT =====
@@ -299,6 +289,9 @@ function toggleTheme(){
   document.documentElement.setAttribute('data-theme',d?'':'dark');
   localStorage.setItem('oila_theme',d?'light':'dark');
   document.getElementById('theme-icon').className=d?'fas fa-moon':'fas fa-sun';
+  // Update toggle switch directly without re-rendering
+  document.querySelectorAll('.toggle-sw').forEach(s=>s.classList.toggle('active',!d));
+  const profP=document.querySelector('.prof-text p');if(profP&&profP.closest('.prof-menu')?.querySelector('.toggle-sw'))profP.textContent=!d?'Yoqilgan':'O\'chirilgan';
 }
 
 function showPage(p){
@@ -307,7 +300,7 @@ function showPage(p){
   const pages=['home','cart','orders','favorites','profile'];
   document.querySelectorAll('.nav-item').forEach((n,i)=>{n.classList.toggle('active',pages[i]===p)});
   if(supTimer&&p!=='support'){clearInterval(supTimer);supTimer=null;}
-  if(p==='cart')renderCart();
+  if(p==='cart'){loadCart().then(()=>renderCart())}
   if(p==='orders')loadOrders();
   if(p==='favorites')loadFavs();
   if(p==='profile')renderProfile();
@@ -329,10 +322,20 @@ async function loadBanners(){
   if(!r.success||!r.data||!r.data.length){
     el.innerHTML='<div class="banner-slide active" style="background:linear-gradient(135deg,#6C63FF,#FF6584)"><div class="banner-content"><h3>Oila Marketga xush kelibsiz!</h3><p>Eng yaxshi mahsulotlar eng arzon narxlarda</p></div></div>';return;
   }
-  const bs=r.data;
-  el.innerHTML=bs.map((b,i)=>`<div class="banner-slide${i===0?' active':''}" style="background-image:url('${img(b.image)}')"><div class="banner-content"><h3>🛒 Oila Market</h3><p>Maxsus takliflar va chegirmalar</p></div></div>`).join('')+
+  const bs=r.data;bannersData=bs;
+  el.innerHTML=bs.map((b,i)=>`<div class="banner-slide${i===0?' active':''}" data-idx="${i}" onclick="clickBanner(${i})" style="background-image:url('${img(b.image)}')"><div class="banner-content"><h3>🛒 Oila Market</h3><p>Maxsus takliflar va chegirmalar</p></div></div>`).join('')+
     '<div class="banner-dots">'+bs.map((_,i)=>`<div class="banner-dot${i===0?' active':''}" onclick="goBanner(${i})"></div>`).join('')+'</div>';
+  // Touch swipe
+  let sx=0;
+  el.addEventListener('touchstart',e=>{sx=e.touches[0].clientX},{passive:true});
+  el.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-sx;if(Math.abs(dx)>40){if(dx>0)goBanner((bannerIdx-1+bs.length)%bs.length);else goBanner((bannerIdx+1)%bs.length)}},{passive:true});
   if(bs.length>1){bannerTimer=setInterval(()=>{bannerIdx=(bannerIdx+1)%bs.length;goBanner(bannerIdx)},4000)}
+}
+function clickBanner(i){
+  if(!bannersData||!bannersData[i])return;
+  const b=bannersData[i];
+  if(b.productId){openProd(b.productId)}
+  else if(b.link){window.open(b.link,'_blank')}
 }
 function goBanner(i){
   bannerIdx=i;
@@ -422,7 +425,7 @@ async function submitRev(pid){
 // ===== CART =====
 async function loadCart(){const r=await api('getCart',{userId:U.id});cart=r.success&&r.data?r.data:[];updCartBadge()}
 function updCartBadge(){const b=document.getElementById('cart-badge');const t=cart.reduce((s,i)=>s+Number(i.quantity||0),0);b.textContent=t||''}
-async function addCart(pid){await api('addToCart',{userId:U.id,productId:pid,quantity:1});showToast("Savatga qo'shildi! 🛒");loadCart()}
+async function addCart(pid){await api('addToCart',{userId:U.id,productId:pid,quantity:1});showToast("Savatga qo'shildi! 🛒");await loadCart()}
 async function updQty(id,q){if(q<1){rmCart(id);return}await api('updateCartItem',{id,quantity:q});loadCart()}
 async function rmCart(id){await api('removeFromCart',{id});loadCart();renderCart()}
 function renderCart(){
@@ -455,8 +458,8 @@ function renderCheckout(){
       <div class="del-opt" onclick="selDel(this,'pickup')"><i class="fas fa-store"></i>O'zim olib ketaman</div>
     </div></div>
     <div class="checkout-sec" id="addr-sec"><h3><i class="fas fa-map-marker-alt"></i> Manzil</h3>
-    <div class="form-group"><label>Manzil</label><input id="co-addr" value="${U.address||''}" placeholder="Manzilingizni kiriting"></div>
-    <div class="form-group"><label>Telefon</label><input id="co-phone" value="${U.phone||''}" placeholder="+998 XX XXX XX XX"></div></div>
+    <div class="form-group"><label>Manzil</label><input id="co-addr" value="${U.address||''}" placeholder="Manzilingizni kiriting (kamida 5 belgi)"></div>
+    <div class="form-group"><label>Telefon</label><input id="co-phone" value="${U.phone||'+998 '}" placeholder="+998 XX XXX XX XX" oninput="fixPhone(this)"></div></div>
     <div class="checkout-sec"><h3><i class="fas fa-sticky-note"></i> Izoh</h3>
     <div class="form-group"><textarea id="co-note" placeholder="Qo'shimcha izoh..." rows="2"></textarea></div></div>
     <div class="checkout-sec"><h3><i class="fas fa-ticket-alt"></i> Promokod</h3>
@@ -500,9 +503,12 @@ async function placeOrder(){
   const addr=document.getElementById('co-addr')?.value.trim()||'';
   const phone=document.getElementById('co-phone')?.value.trim()||'';
   const note=document.getElementById('co-note')?.value.trim()||'';
-  if(delType==='delivery'&&!addr){showToast('Manzil kiriting');return}
+  if(delType==='delivery'){
+    if(!addr||addr.length<5){showToast('Manzil kamida 5 belgi bo\'lishi kerak');return}
+  }
+  if(!phone.startsWith('+998')||phone.length<9){showToast('Telefon raqam +998 bilan boshlanishi va kamida 9 raqam bo\'lishi kerak');return}
   let sub=0;
-  const items=cart.map(i=>{const p=i.product||{};const t=Number(p.price||0)*Number(i.quantity);sub+=t;return{name:p.name,qty:Number(i.quantity),price:p.price,total:t,productId:p.id}});
+  const items=cart.map(i=>{const p=i.product||{};const t=Number(p.price||0)*Number(i.quantity);sub+=t;return{name:p.name,qty:Number(i.quantity),price:p.price||0,total:t,productId:p.id}});
   const del=delType==='pickup'?0:10000;
   const disc=promoDiscount>0?(appliedPromo?.type==='percent'?Math.round(sub*promoDiscount/100):promoDiscount):0;
   await api('createOrder',{userId:U.id,userName:U.name,items,total:Math.max(0,sub+del-disc),address:addr,phone,note,deliveryType:delType,promoCode:appliedPromo?.code||''});
@@ -517,11 +523,20 @@ async function loadOrders(){
   const sm={pending:'Kutilmoqda',confirmed:'Tasdiqlandi',shipping:'Yetkazilmoqda',delivered:'Yetkazildi',cancelled:'Bekor qilindi'};
   el.innerHTML=r.data.map(o=>{
     let items=[];try{items=typeof o.items==='string'?JSON.parse(o.items):o.items}catch(e){}
-    const itemStr=Array.isArray(items)?items.map(i=>(i.name||'')+' x'+(i.qty||i.quantity||1)).join(', '):'';
-    return `<div class="order-card"><div class="order-hdr"><span class="order-id">#${(o.id||'').slice(-6)}</span><span class="order-status st-${o.status}">${sm[o.status]||o.status}</span></div>
-    <div class="order-items">${itemStr||'Mahsulotlar'}</div>
-    <div class="order-ftr"><span>${o.createdAt?new Date(o.createdAt).toLocaleDateString('uz'):''}</span><span class="order-total">${fp(o.total)}</span></div>
-    ${o.deliveryType==='pickup'?'<div style="font-size:11px;color:var(--text2);margin-top:4px"><i class="fas fa-store"></i> O\'zim olib ketaman</div>':''}
+    const itemsHtml=Array.isArray(items)&&items.length?items.map(i=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px">
+      <div style="flex:1"><div style="font-weight:600">${i.name||'Mahsulot'}</div><div style="color:var(--text2)">${i.qty||i.quantity||1} x ${fp(i.price||0)}</div></div>
+      <div style="font-weight:700;color:var(--primary);white-space:nowrap">${fp(i.total||(Number(i.price||0)*Number(i.qty||i.quantity||1)))}</div></div>`).join(''):'<div style="color:var(--text2);font-size:12px">Mahsulotlar ma\'lumoti yo\'q</div>';
+    return `<div class="order-card">
+      <div class="order-hdr"><span class="order-id">#${(o.id||'').slice(-6)}</span><span class="order-status st-${o.status}">${sm[o.status]||o.status}</span></div>
+      <div style="margin:8px 0">${itemsHtml}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;font-size:11px;color:var(--text2)">
+        <span><i class="fas fa-truck"></i> ${o.deliveryType==='pickup'?'O\'zim olib ketaman':'Yetkazib berish'}</span>
+        ${o.address?'<span><i class="fas fa-map-marker-alt"></i> '+o.address+'</span>':''}
+        ${o.phone?'<span><i class="fas fa-phone"></i> '+o.phone+'</span>':''}
+        ${o.promoCode?'<span><i class="fas fa-ticket-alt"></i> '+o.promoCode+'</span>':''}
+      </div>
+      <div class="order-ftr"><span><i class="fas fa-calendar"></i> ${o.createdAt?new Date(o.createdAt).toLocaleString('uz'):''}</span><span class="order-total">${fp(o.total)}</span></div>
+      ${o.deliveredAt?'<div style="font-size:11px;color:var(--accent);margin-top:4px"><i class="fas fa-check-circle"></i> Yetkazilgan: '+new Date(o.deliveredAt).toLocaleString('uz')+'</div>':''}
     </div>`;
   }).join('');
 }
@@ -566,13 +581,16 @@ function renderEdit(){
       </div>
       <div style="font-size:11px;color:var(--text2);background:var(--bg);padding:8px 12px;border-radius:8px"><i class="fab fa-telegram"></i> Telegram ma'lumotlari avtomatik yuklanadi va o'zgartirilmaydi</div>
     </div>
-    <div class="form-group"><label><i class="fas fa-phone"></i> Telefon raqam</label><input id="ed-phone" value="${U.phone||''}" placeholder="+998 XX XXX XX XX"></div>
-    <div class="form-group"><label><i class="fas fa-map-marker-alt"></i> Manzil</label><input id="ed-addr" value="${U.address||''}" placeholder="Manzilingizni kiriting"></div>
+    <div class="form-group"><label><i class="fas fa-phone"></i> Telefon raqam</label><input id="ed-phone" value="${U.phone||'+998 '}" placeholder="+998 XX XXX XX XX" oninput="fixPhone(this)"></div>
+    <div class="form-group"><label><i class="fas fa-map-marker-alt"></i> Manzil</label><input id="ed-addr" value="${U.address||''}" placeholder="Manzilingizni kiriting (kamida 5 belgi)"></div>
     <button class="btn-primary" onclick="saveProf()"><i class="fas fa-save"></i> Saqlash</button>`;
 }
+function fixPhone(el){if(!el.value.startsWith('+998'))el.value='+998 '+el.value.replace(/[^0-9 ]/g,'')}
 async function saveProf(){
   const phone=document.getElementById('ed-phone').value.trim();
   const address=document.getElementById('ed-addr').value.trim();
+  if(!phone.startsWith('+998')||phone.length<9){showToast('Telefon raqam +998 bilan boshlanishi va kamida 9 raqam bo\'lishi kerak');return}
+  if(address&&address.length<5){showToast('Manzil kamida 5 belgi bo\'lishi kerak');return}
   await api('updateProfile',{id:U.id,telegramId:U.telegramId,phone,address});
   U.phone=phone;U.address=address;
   localStorage.setItem('oila_user',JSON.stringify(U));
