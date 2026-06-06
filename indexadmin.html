@@ -123,7 +123,6 @@ tr:hover{background:var(--bg)}
     </div>
   </nav>
   <div class="sb-footer">
-    <button class="nav-link" onclick="api('initSheets').then(r=>toast(r.success?'Sheets tiklandi!':'Xato'))"><i class="fas fa-tools"></i>Sheets tiklash</button>
     <button class="nav-link" onclick="toggleTheme()"><i class="fas fa-moon" id="theme-icon"></i>Qorong'u rejim</button>
     <button class="nav-link" onclick="window.open(location.href.replace('indexadmin.html',''),'_blank')"><i class="fas fa-external-link-alt"></i>User app</button>
   </div>
@@ -269,23 +268,16 @@ tr:hover{background:var(--bg)}
 <div class="toast" id="toast"></div>
 
 <script>
-const API='https://script.google.com/macros/s/AKfycbyOi5VG7LWC_XVi0eyIaqdOq8fWNKlhLGWSNtlbc3rukTTypS_EKyBLlBMM6A2p-uLh/exec';
+const API='https://script.google.com/macros/s/AKfycbxUqXJGkkicx0GxHPDjzdlIiAIyX3QPx0SKfQj67y7d1Rnqen2vodooj_wqq5GQRytF/exec';
 let products=[],categories=[],orders=[],users=[],reviews=[],banners=[],promos=[],prodImgs=[];
 
+// ===== FAST API (POST-only - fixes image upload & chat) =====
 async function api(action,params={}){
   try{
-    const url=API+'?action='+encodeURIComponent(action)+'&'+new URLSearchParams(params).toString();
-    const r=await fetch(url);
+    const r=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action,...params})});
     if(!r.ok)throw new Error('HTTP '+r.status);
     return await r.json();
-  }catch(e){
-    try{
-      await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action,...params})});
-      await new Promise(r=>setTimeout(r,300));
-      const url=API+'?action='+encodeURIComponent(action)+'&'+new URLSearchParams(params).toString();
-      const r2=await fetch(url);return await r2.json();
-    }catch(e2){return{success:false,error:e2.message}}
-  }
+  }catch(e){return{success:false,error:e.message}}
 }
 
 function init(){
@@ -385,14 +377,29 @@ async function loadOrders(){const st=document.getElementById('ord-filter').value
     <select class="btn btn-sm btn-outline" onchange="chgOrdSt('${o.id}',this.value)" style="padding:3px 6px;font-size:10px"><option value="">Holat</option><option value="confirmed">Tasdiqlash</option><option value="shipping">Yetkazish</option><option value="delivered">Yetkazildi</option><option value="cancelled">Bekor</option></select>
     <button class="btn btn-sm btn-danger" onclick="delOrd('${o.id}')"><i class="fas fa-trash"></i></button></td></tr>`}).join('')||'<tr><td colspan="8"><div class="empty"><p>Yo\'q</p></div></td></tr>'}
 function viewOrd(id){const o=orders.find(x=>x.id===id);if(!o)return;let items=[];try{items=typeof o.items==='string'?JSON.parse(o.items):o.items}catch(e){}
-  document.getElementById('ord-detail').innerHTML=`<p><strong>ID:</strong> #${(o.id||'').slice(-6)}</p><p><strong>Mijoz:</strong> ${o.userName||''}</p><p><strong>Telefon:</strong> ${o.phone||'-'}</p><p><strong>Manzil:</strong> ${o.address||'-'}</p><p><strong>Tur:</strong> ${o.deliveryType==='pickup'?"O'zi olib ketish":"Yetkazib berish"}</p><p><strong>Izoh:</strong> ${o.note||'-'}</p><p><strong>Promokod:</strong> ${o.promoCode||'-'}</p>
-  <hr style="margin:10px 0;border-color:var(--border)"><h4>Mahsulotlar:</h4>
-  ${Array.isArray(items)?items.map(i=>`<div style="display:flex;justify-content:space-between;padding:5px 0;font-size:13px"><span>${i.name||''} x${i.qty||i.quantity||1}</span><span>${fp(i.total||0)}</span></div>`).join(''):'<p>Mahsulotlar ko\'rsatilmayapti</p>'}
-  <hr style="margin:10px 0;border-color:var(--border)"><div style="display:flex;justify-content:space-between;font-weight:800;font-size:16px;color:var(--primary)"><span>Jami:</span><span>${fp(o.total)}</span></div>
-  <p style="margin-top:10px;font-size:12px;color:var(--text2)">📅 Yaratilgan: ${o.createdAt?new Date(o.createdAt).toLocaleString():''}</p>
-  <p style="font-size:12px;color:var(--text2)">📅 Yangilangan: ${o.updatedAt?new Date(o.updatedAt).toLocaleString():'-'}</p>
-  ${o.deliveredAt?'<p style="font-size:12px;color:var(--accent);font-weight:600">✅ Yetkazilgan: '+new Date(o.deliveredAt).toLocaleString()+'</p>':''}
-  <select class="btn btn-primary" style="margin-top:10px;width:100%" onchange="chgOrdSt('${o.id}',this.value);cm('m-ord')"><option value="">Holatni o'zgartirish</option><option value="pending">Kutilmoqda</option><option value="confirmed">Tasdiqlash</option><option value="shipping">Yetkazish</option><option value="delivered">Yetkazildi</option><option value="cancelled">Bekor</option></select>`;
+  const itemsHtml=Array.isArray(items)&&items.length?items.map(i=>{const qty=i.qty||i.quantity||1;const price=i.price||0;const total=i.total||(Number(price)*Number(qty));return `<div style="display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)">
+    <div style="flex:1"><div style="font-weight:700;font-size:13px">${i.name||'Mahsulot'}</div>
+    <div style="color:var(--text2);font-size:12px;margin-top:2px">${qty} x ${fp(price)}</div></div>
+    <div style="font-weight:800;color:var(--primary);font-size:14px;white-space:nowrap">${fp(total)}</div></div>`}).join(''):'<p style="color:var(--text2)">Mahsulotlar ma\'lumoti yo\'q</p>';
+  document.getElementById('ord-detail').innerHTML=`
+  <div style="background:var(--bg);border-radius:var(--radius-sm);padding:14px;margin-bottom:14px">
+    <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="color:var(--text2);font-size:12px">ID</span><strong>#${(o.id||'').slice(-6)}</strong></div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="color:var(--text2);font-size:12px">Mijoz</span><strong>${o.userName||'-'}</strong></div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="color:var(--text2);font-size:12px">Telefon</span><strong>${o.phone||'-'}</strong></div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="color:var(--text2);font-size:12px">Manzil</span><strong>${o.address||'-'}</strong></div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="color:var(--text2);font-size:12px">Yetkazish</span><strong>${o.deliveryType==='pickup'?'🏪 O\'zi olib ketish':'🚚 Yetkazib berish'}</strong></div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="color:var(--text2);font-size:12px">Izoh</span><strong>${o.note||'-'}</strong></div>
+    <div style="display:flex;justify-content:space-between"><span style="color:var(--text2);font-size:12px">Promokod</span><strong>${o.promoCode||'-'}</strong></div>
+  </div>
+  <h4 style="margin-bottom:10px;font-size:15px">📦 Mahsulotlar (${Array.isArray(items)?items.length:0})</h4>
+  ${itemsHtml}
+  <div style="display:flex;justify-content:space-between;font-weight:800;font-size:17px;color:var(--primary);margin-top:14px;padding-top:10px;border-top:2px solid var(--border)"><span>Jami:</span><span>${fp(o.total)}</span></div>
+  <div style="margin-top:14px;background:var(--bg);border-radius:var(--radius-sm);padding:12px;font-size:12px;color:var(--text2)">
+    <div style="margin-bottom:4px">📅 Yaratilgan: ${o.createdAt?new Date(o.createdAt).toLocaleString():'-'}</div>
+    <div style="margin-bottom:4px">🔄 Yangilangan: ${o.updatedAt?new Date(o.updatedAt).toLocaleString():'-'}</div>
+    ${o.deliveredAt?'<div style="color:var(--accent);font-weight:600">✅ Yetkazilgan: '+new Date(o.deliveredAt).toLocaleString()+'</div>':''}
+  </div>
+  <select class="btn btn-primary" style="margin-top:12px;width:100%" onchange="chgOrdSt('${o.id}',this.value);cm('m-ord')"><option value="">Holatni o'zgartirish</option><option value="pending">Kutilmoqda</option><option value="confirmed">Tasdiqlash</option><option value="shipping">Yetkazish</option><option value="delivered">Yetkazildi</option><option value="cancelled">Bekor</option></select>`;
   om('m-ord')}
 async function chgOrdSt(id,st){if(!st)return;await api('updateOrderStatus',{id,status:st});toast('Holat o\'zgartirildi!');loadOrders()}
 async function delOrd(id){if(!confirm("O'chirilsinmi?"))return;await api('deleteOrder',{id});toast("O'chirildi");loadOrders()}
