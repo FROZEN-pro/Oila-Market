@@ -241,7 +241,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);trans
 </nav>
 
 <script>
-const API='https://script.google.com/macros/s/AKfycbxUqXJGkkicx0GxHPDjzdlIiAIyX3QPx0SKfQj67y7d1Rnqen2vodooj_wqq5GQRytF/exec';
+const API='https://script.google.com/macros/s/AKfycbx6p90sMiTEm7rpz_MtUN7B2fV_mLs4z-Pm7vT0R4oXkgvpkLzmNAaxomjDfW5IeveP/exec';
 const BOT_USERNAME='QiziriqOilaMarketBot'; // Replace with your bot username
 let U=JSON.parse(localStorage.getItem('oila_user'))||null;
 let products=[],categories=[],cart=[],favs=[],bannerIdx=0,bannerTimer=null,bannersData=[],selRating=5,appliedPromo=null,promoDiscount=0;
@@ -597,8 +597,29 @@ async function saveProf(){
   showToast('Profil saqlandi! ✅');showPage('profile');
 }
 
+// ===== IMAGE RESIZE =====
+function resizeImage(file,maxMB){
+  maxMB=maxMB||5;
+  return new Promise(function(resolve,reject){
+    if(file.size>maxMB*1024*1024){reject(new Error('Rasm '+maxMB+'MB dan katta! Kichikroq rasm tanlang.'));return}
+    var reader=new FileReader();
+    reader.onload=function(e){
+      var im=new Image();
+      im.onload=function(){
+        var c=document.createElement('canvas'),w=im.width,h=im.height,mx=1200;
+        if(w>mx||h>mx){if(w>h){h=h*mx/w;w=mx}else{w=w*mx/h;h=mx}}
+        c.width=w;c.height=h;
+        c.getContext('2d').drawImage(im,0,0,w,h);
+        resolve(c.toDataURL('image/jpeg',0.7).split(',')[1]);
+      };im.onerror=function(){reject(new Error('Rasm yuklanmadi'))};
+      im.src=e.target.result;
+    };reader.readAsDataURL(file);
+  });
+}
+
 // ===== SUPPORT CHAT =====
 let supTimer=null;
+const WELCOME_MSG='Assalomu alaykum! 👋 Oila Market qo\'llab-quvvatlash xizmatiga xush kelibsiz!\n\nSavollaringiz bo\'lsa, bemalol yozing. Biz sizga yordam berishga tayyormiz! 😊';
 async function loadSupport(){
   if(supTimer){clearInterval(supTimer);supTimer=null;}
   await refreshSup();
@@ -608,10 +629,11 @@ async function refreshSup(){
   const r=await api('getSupportMessages',{userId:U.id});
   const msgs=r.success&&r.data?r.data:[];
   const box=document.getElementById('chat-msgs');
+  const WELCOME_HTML='<div class="chat-msg received"><div class="bubble" style="background:var(--primary);color:#fff;border-radius:16px;border-bottom-left-radius:4px;padding:12px 16px"><span style="white-space:pre-line">'+WELCOME_MSG+'</span></div></div>';
   if(!box){
     document.getElementById('support-content').innerHTML=`
       <div class="chat-box"><div class="chat-msgs" id="chat-msgs">
-      ${msgs.length?msgs.map(m=>`<div class="chat-msg ${m.isAdmin===true||m.isAdmin==='true'?'received':'sent'}"><div class="bubble">${m.image?'<img src="'+m.image+'" style="max-width:200px;border-radius:8px;display:block;margin-bottom:4px" onerror="this.style.display=\'none\'">':''}${m.message?'<span>'+m.message+'</span>':''}</div><div class="time">${new Date(m.createdAt).toLocaleString()}</div></div>`).join(''):'<div class="empty-state"><i class="fas fa-comments"></i><h3>Chat bo\'sh</h3><p>Savolingizni yozing</p></div>'}
+      ${msgs.length?msgs.map(m=>`<div class="chat-msg ${m.isAdmin===true||m.isAdmin==='true'?'received':'sent'}"><div class="bubble">${m.image?'<img src="'+m.image+'" style="max-width:200px;border-radius:8px;display:block;margin-bottom:4px" onerror="this.style.display=\'none\'">':''}${m.message?'<span>'+m.message+'</span>':''}</div><div class="time">${new Date(m.createdAt).toLocaleString()}</div></div>`).join(''):WELCOME_HTML}
       </div>
       <div class="chat-input">
         <label style="width:40px;height:40px;border-radius:50%;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--primary);flex-shrink:0"><i class="fas fa-image"></i><input type="file" accept="image/*" style="display:none" onchange="sendSupImg(this)"></label>
@@ -619,7 +641,7 @@ async function refreshSup(){
       </div></div>`;
     const bx=document.getElementById('chat-msgs');if(bx)bx.scrollTop=bx.scrollHeight;
   } else {
-    box.innerHTML=msgs.length?msgs.map(m=>`<div class="chat-msg ${m.isAdmin===true||m.isAdmin==='true'?'received':'sent'}"><div class="bubble">${m.image?'<img src="'+m.image+'" style="max-width:200px;border-radius:8px;display:block;margin-bottom:4px" onerror="this.style.display=\'none\'">':''}${m.message?'<span>'+m.message+'</span>':''}</div><div class="time">${new Date(m.createdAt).toLocaleString()}</div></div>`).join(''):'';
+    box.innerHTML=msgs.length?msgs.map(m=>`<div class="chat-msg ${m.isAdmin===true||m.isAdmin==='true'?'received':'sent'}"><div class="bubble">${m.image?'<img src="'+m.image+'" style="max-width:200px;border-radius:8px;display:block;margin-bottom:4px" onerror="this.style.display=\'none\'">':''}${m.message?'<span>'+m.message+'</span>':''}</div><div class="time">${new Date(m.createdAt).toLocaleString()}</div></div>`).join(''):WELCOME_HTML;
     box.scrollTop=box.scrollHeight;
   }
 }
@@ -632,17 +654,18 @@ async function sendChat(){
 }
 async function sendSupImg(inp){
   if(!inp.files[0])return;
-  const reader=new FileReader();
-  reader.onload=async function(e){
-    const b64=e.target.result.split(',')[1];
+  try{
+    showToast('Rasm kichraytirilmoqda...');
+    var b64=await resizeImage(inp.files[0]);
     showToast('Rasm yuklanmoqda...');
-    const r=await api('uploadImage',{imageData:b64});
+    var r=await api('uploadImage',{imageData:b64});
     if(r.success&&r.data){
       await api('sendSupportMessage',{userId:U.id,userName:U.name,message:'📷 Rasm',image:r.data.url});
       showToast('Rasm yuborildi! ✅');
       refreshSup();
     }else showToast('Rasm yuklanmadi');
-  };reader.readAsDataURL(inp.files[0]);
+  }catch(e){showToast(e.message)}
+  inp.value='';
 }
 
 // ===== INVITE FRIENDS =====
