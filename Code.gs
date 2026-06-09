@@ -151,6 +151,8 @@ function route(action, b) {
     case 'getSupportMessages': return getSupportMessages(b);
     case 'sendSupportMessage': return sendSupportMessage(b);
     case 'replySupport': return replySupport(b);
+    case 'getSupportUsers': return getSupportUsers();
+    case 'markSupportRead': return markSupportRead(b);
     case 'initSheets': return { success: true, data: initAllSheets() };
     default: return { success: false, error: 'Unknown: ' + action };
   }
@@ -610,6 +612,40 @@ function sendSupportMessage(b) {
 function replySupport(b) {
   getSheet('SupportMessages').appendRow(['SM'+Date.now(), b.userId, 'Admin', b.message||'', b.image||'', true, new Date().toISOString(), false]);
   sendNotification({ userId: b.userId, title: '💬 Support javob', message: b.message || 'Rasm yuborildi' });
+  return { success: true };
+}
+
+function getSupportUsers() {
+  var sheet = getSheet('SupportMessages');
+  if (sheet.getLastRow() <= 1) return { success: true, data: [] };
+  var msgs = rowsToObjects(sheet.getDataRange().getValues());
+  var userMap = {};
+  msgs.forEach(function(m) {
+    var uid = String(m.userId);
+    if (!userMap[uid]) userMap[uid] = { userId: uid, userName: m.userName || 'User', unread: 0, lastMessage: '', lastImage: '', lastAt: '' };
+    if (!isTrue(m.isAdmin) && !isTrue(m.isRead)) userMap[uid].unread++;
+    var mTime = new Date(m.createdAt || 0).getTime();
+    var curTime = userMap[uid].lastAt ? new Date(userMap[uid].lastAt).getTime() : 0;
+    if (mTime >= curTime) {
+      userMap[uid].lastMessage = m.message || '';
+      userMap[uid].lastImage = m.image || '';
+      userMap[uid].lastAt = m.createdAt;
+    }
+  });
+  var result = Object.values(userMap);
+  result.sort(function(a, b) { return new Date(b.lastAt || 0) - new Date(a.lastAt || 0); });
+  return { success: true, data: result };
+}
+
+function markSupportRead(b) {
+  var sheet = getSheet('SupportMessages');
+  if (sheet.getLastRow() <= 1) return { success: true };
+  var data = sheet.getDataRange().getValues();
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][1]) === String(b.userId) && !isTrue(data[i][7])) {
+      sheet.getRange(i + 1, 8).setValue(true);
+    }
+  }
   return { success: true };
 }
 
