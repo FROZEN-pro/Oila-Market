@@ -1,8 +1,8 @@
 // ============================================
 // OILA MARKET - GOOGLE APPS SCRIPT BACKEND v3
 // ============================================
-const SPREADSHEET_ID = '1f7C7a5Piw_2rQIMvxcqppnq6M3iofH1aZCUI_ANoMx0';
-const IMGBB_API_KEY = 'ad433e82aae872eebbb30c5bfe3fac42';
+const SPREADSHEET_ID = 'YOUR_SPREADSHEET_ID';
+const IMGBB_API_KEY = 'YOUR_IMGBB_API_KEY';
 
 // ===== SHEET HELPERS =====
 function getSheet(name) {
@@ -248,29 +248,48 @@ function deleteCategory(b) {
 // Users cols: 0:id,1:telegramId,2:username,3:name,4:phone,5:address,6:avatar,7:role,8:createdAt,9:lastLogin,10:isActive
 function loginUser(b) {
   var sheet = getSheet('Users');
-  var all = rowsToObjects(sheet.getDataRange().getValues());
+  var allData = sheet.getDataRange().getValues();
   var tid = String(b.telegramId || '');
-  var user = all.find(function(u) { return String(u.telegramId) === tid; });
-  if (!user) {
+  
+  // Find user by telegramId
+  var foundIdx = -1;
+  for (var i = 1; i < allData.length; i++) {
+    if (String(allData[i][1]) === tid) { foundIdx = i; break; }
+  }
+  
+  if (foundIdx === -1) {
+    // New user - create record
     var id = 'U' + Date.now();
     var now = new Date().toISOString();
     sheet.appendRow([id, tid, b.username||'', b.name||'User', '', '', b.avatar||'', 'user', now, now, true]);
-    user = { id:id, telegramId:tid, username:b.username||'', name:b.name||'User', phone:'', address:'', avatar:b.avatar||'', role:'user', isActive:true };
+    var user = { id:id, telegramId:tid, username:b.username||'', name:b.name||'User', phone:'', address:'', avatar:b.avatar||'', role:'user', isActive:true };
     logActivity({ userId:id, action:'register', details:b.name||'New user' });
+    return { success: true, data: user };
   } else {
-    var found = findRow(sheet, 1, tid);
-    if (found) {
-      sheet.getRange(found.row, 10).setValue(new Date().toISOString());
-      // Only update Telegram-provided fields (name, username, avatar) - never user-editable fields
-      if (b.name && b.name !== 'User') sheet.getRange(found.row, 4).setValue(b.name);
-      if (b.username) sheet.getRange(found.row, 3).setValue(b.username);
-      if (b.avatar) sheet.getRange(found.row, 7).setValue(b.avatar);
-      user.name = b.name || user.name;
-      user.username = b.username || user.username;
-      user.avatar = b.avatar || user.avatar;
-    }
+    // Existing user - update Telegram fields only (never overwrite user-editable fields)
+    var row = foundIdx + 1;
+    sheet.getRange(row, 10).setValue(new Date().toISOString());
+    if (b.name && b.name !== 'User') sheet.getRange(row, 4).setValue(b.name);
+    if (b.username) sheet.getRange(row, 3).setValue(b.username);
+    if (b.avatar) sheet.getRange(row, 7).setValue(b.avatar);
+    
+    // Return FULL user record from database (includes saved phone/address)
+    var updated = sheet.getRange(row, 1, 1, 11).getValues()[0];
+    var user = {
+      id: updated[0],
+      telegramId: updated[1],
+      username: updated[2],
+      name: updated[3],
+      phone: updated[4] || '',
+      address: updated[5] || '',
+      avatar: updated[6],
+      role: updated[7],
+      createdAt: updated[8],
+      lastLogin: updated[9],
+      isActive: updated[10]
+    };
+    return { success: true, data: user };
   }
-  return { success: true, data: user };
 }
 
 function getUser(b) {
