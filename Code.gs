@@ -1,8 +1,8 @@
 // ============================================
 // OILA MARKET - GOOGLE APPS SCRIPT BACKEND v3
 // ============================================
-const SPREADSHEET_ID = 'YOUR_SPREADSHEET_ID';
-const IMGBB_API_KEY = 'YOUR_IMGBB_API_KEY';
+const SPREADSHEET_ID = '1f7C7a5Piw_2rQIMvxcqppnq6M3iofH1aZCUI_ANoMx0';
+const IMGBB_API_KEY = 'ad433e82aae872eebbb30c5bfe3fac42';
 
 // ===== SHEET HELPERS =====
 function getSheet(name) {
