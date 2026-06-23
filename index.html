@@ -241,27 +241,41 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);trans
 </nav>
 
 <script>
-const API='https://script.google.com/macros/s/AKfycbx6p90sMiTEm7rpz_MtUN7B2fV_mLs4z-Pm7vT0R4oXkgvpkLzmNAaxomjDfW5IeveP/exec';
+const API='https://script.google.com/macros/s/AKfycbwD1vucn3LvWd6dALhcH3VLY3BTIjZ0S3Njf0JSeMyU6eKJRbzkHupfGhbhKb56V61n/exec';
 const BOT_USERNAME='QiziriqOilaMarketBot'; // Replace with your bot username
 let U=JSON.parse(localStorage.getItem('oila_user'))||null;
 let products=[],categories=[],cart=[],favs=[],bannerIdx=0,bannerTimer=null,bannersData=[],selRating=5,appliedPromo=null,promoDiscount=0;
 
 // ===== TELEGRAM INTEGRATION =====
 function initTelegram(){
+  // Load existing cached user from localStorage first
+  const cached = JSON.parse(localStorage.getItem('oila_user')) || null;
   try{
     if(window.Telegram&&Telegram.WebApp){
       Telegram.WebApp.ready();
       Telegram.WebApp.expand();
       const u=Telegram.WebApp.initDataUnsafe?.user;
       if(u){
-        U={id:'U'+u.id,telegramId:String(u.id),username:u.username||'',name:u.first_name+(u.last_name?' '+u.last_name:''),phone:'',address:'',avatar:u.photo_url||'',role:'user',isActive:true};
+        if(cached && (cached.telegramId === String(u.id) || cached.id === 'U'+u.id)){
+          // Same user returning - preserve saved data (phone, address, etc.)
+          cached.name = u.first_name + (u.last_name ? ' '+u.last_name : '');
+          cached.username = u.username || cached.username || '';
+          cached.avatar = u.photo_url || cached.avatar || '';
+          U = cached;
+        } else {
+          // New user or different account
+          U={id:'U'+u.id,telegramId:String(u.id),username:u.username||'',name:u.first_name+(u.last_name?' '+u.last_name:''),phone:'',address:'',avatar:u.photo_url||'',role:'user',isActive:true};
+        }
         localStorage.setItem('oila_user',JSON.stringify(U));
       }
     }
   }catch(e){}
   if(!U){
-    U={id:'U'+Date.now(),telegramId:'g'+Date.now(),username:'',name:'Mehmon',phone:'',address:'',avatar:'',role:'user',isActive:true};
-    localStorage.setItem('oila_user',JSON.stringify(U));
+    if(cached){ U = cached; }
+    else {
+      U={id:'U'+Date.now(),telegramId:'g'+Date.now(),username:'',name:'Mehmon',phone:'',address:'',avatar:'',role:'user',isActive:true};
+      localStorage.setItem('oila_user',JSON.stringify(U));
+    }
   }
 }
 
@@ -280,8 +294,12 @@ async function init(){
   const saved=localStorage.getItem('oila_theme');
   if(saved==='dark'){document.documentElement.setAttribute('data-theme','dark');const ti=document.getElementById('theme-icon');if(ti)ti.className='fas fa-sun';}
   await Promise.all([loadCats(),loadProds(),loadBanners(),loadCart(),checkNotifs()]);
-  // Register user on backend
-  api('loginUser',{telegramId:U.telegramId,username:U.username,name:U.name,avatar:U.avatar});
+  // Sync user with backend - get full record including saved phone/address
+  const loginResult = await api('loginUser',{telegramId:U.telegramId,username:U.username,name:U.name,avatar:U.avatar});
+  if(loginResult.success && loginResult.data){
+    U = loginResult.data;
+    localStorage.setItem('oila_user',JSON.stringify(U));
+  }
 }
 
 function toggleTheme(){
